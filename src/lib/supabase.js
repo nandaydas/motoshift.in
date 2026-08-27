@@ -550,3 +550,34 @@ export async function uploadMediaAdmin(file, userId = null) {
     throw err;
   }
 }
+
+export async function updateMediaAdmin(id, updates) {
+  try {
+    const { data, error } = await supabase
+      .from('media')
+      .update(updates)
+      .eq('id', id)
+      .select();
+
+    if (error) throw error;
+    return data[0];
+  } catch (err) {
+    console.error('Error updating media record:', err);
+    throw err;
+  }
+}
+
+export async function deleteMediaAdmin(id) {
+  try {
+    const { error } = await supabase
+      .from('media')
+      .update({ is_deleted: true })
+      .eq('id', id);
+
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('Error deleting media record:', err);
+    throw err;
+  }
+}
