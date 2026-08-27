@@ -5,6 +5,87 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIU
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+// ==================== AUTH SERVICES ====================
+
+export async function signInUser({ email, password }) {
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    
+    // Fetch profile role from profiles table
+    let role = 'author';
+    let name = email.split('@')[0];
+    let avatar = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80';
+
+    if (data.user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', data.user.id)
+        .single();
+
+      if (profile) {
+        role = profile.role || 'author';
+        name = profile.name || name;
+        avatar = profile.avatar || avatar;
+      }
+    }
+
+    return {
+      user: {
+        id: data.user.id,
+        email: data.user.email,
+        name,
+        role,
+        avatar
+      }
+    };
+  } catch (err) {
+    console.error('Error signing in:', err);
+    throw err;
+  }
+}
+
+export async function signUpUser({ email, password, name, username }) {
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { name, username }
+      }
+    });
+    if (error) throw error;
+
+    if (data.user) {
+      // Create profile row in profiles table
+      await supabase.from('profiles').insert([
+        {
+          id: data.user.id,
+          name: name || email.split('@')[0],
+          username: username || email.split('@')[0],
+          email: data.user.email,
+          role: 'author',
+          is_approved: true
+        }
+      ]);
+    }
+
+    return {
+      user: {
+        id: data.user?.id,
+        email: data.user?.email,
+        name: name || email.split('@')[0],
+        role: 'author',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80'
+      }
+    };
+  } catch (err) {
+    console.error('Error signing up:', err);
+    throw err;
+  }
+}
+
 // ==================== PUBLIC PORTAL SERVICES ====================
 
 export async function getCategories() {
