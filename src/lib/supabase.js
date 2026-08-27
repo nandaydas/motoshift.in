@@ -11,7 +11,7 @@ export async function signInUser({ email, password }) {
   try {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
-    
+
     // Fetch profile role from profiles table
     let role = 'author';
     let name = email.split('@')[0];
@@ -95,7 +95,7 @@ export async function getCategories() {
       .select('*')
       .eq('is_active', true)
       .order('sort_order', { ascending: true });
-    
+
     if (error) {
       console.error('Error fetching categories from Supabase:', error);
       return [];
@@ -127,7 +127,7 @@ export async function getPosts({ categorySlug, featuredOnly, search, limit = 20 
     }
 
     const { data, error } = await query;
-    
+
     if (error) {
       console.error('Error fetching posts from Supabase:', error);
       return [];
@@ -226,7 +226,7 @@ export async function subscribeNewsletter(email) {
     const { error } = await supabase
       .from('newsletters')
       .insert([{ email, subscribed: true }]);
-    
+
     if (error && error.code !== '23505') throw error;
     return { success: true };
   } catch (err) {
@@ -240,7 +240,7 @@ export async function submitContactForm({ name, email, subject, message }) {
     const { error } = await supabase
       .from('contact_submissions')
       .insert([{ name, email, subject, message, status: 'unread' }]);
-    
+
     if (error) throw error;
     return { success: true };
   } catch (err) {
@@ -275,7 +275,7 @@ export async function getAllPostsAdmin() {
 export async function createOrUpdatePost(postData) {
   try {
     const cleanData = { ...postData };
-    
+
     // Remove relation objects if present
     delete cleanData.category;
     delete cleanData.author;

@@ -3,7 +3,7 @@ import { getMediaAdmin, uploadMediaAdmin, updateMediaAdmin, deleteMediaAdmin } f
 import { useApp } from '../../context/AppContext';
 import { 
   LayoutGrid, List, Search, Upload, X, ChevronLeft, ChevronRight, 
-  Copy, Check, Trash2, Edit3, Image as ImageIcon, ExternalLink 
+  Copy, Check, Edit3, Image as ImageIcon 
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -149,7 +149,7 @@ export default function MediaLibraryPage() {
           Media Library
         </h1>
 
-        <label className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2 rounded shadow transition-all cursor-pointer flex items-center gap-1.5">
+        <label className="bg-[#2271b1] hover:bg-[#135e96] text-white text-xs font-bold px-4 py-2 rounded shadow transition-all cursor-pointer flex items-center gap-1.5">
           <Upload size={14} />
           <span>{uploading ? 'Uploading...' : 'Add Media File'}</span>
           <input type="file" accept="image/*" disabled={uploading} onChange={handleUpload} className="hidden" />
@@ -351,10 +351,10 @@ export default function MediaLibraryPage() {
         </div>
       )}
 
-      {/* Attachment Details Modal (Light High-Contrast CMS Modal) */}
+      {/* Attachment Details Modal (Clean Semi-Transparent Overlay - NO Blur) */}
       {selectedMedia && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fadeIn">
-          <div className="w-full max-w-5xl bg-white text-gray-900 border border-gray-200 rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 animate-fadeIn">
+          <div className="w-full max-w-5xl bg-white text-gray-900 border border-gray-300 rounded-lg shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
             
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-gray-200 bg-white flex items-center justify-between">
