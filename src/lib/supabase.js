@@ -274,19 +274,44 @@ export async function getAllPostsAdmin() {
 
 export async function createOrUpdatePost(postData) {
   try {
-    if (postData.id) {
+    const cleanData = { ...postData };
+    
+    // Remove relation objects if present
+    delete cleanData.category;
+    delete cleanData.author;
+
+    // Sanitize id field
+    if (!cleanData.id || typeof cleanData.id !== 'string' || cleanData.id.trim() === '' || cleanData.id.length !== 36) {
+      delete cleanData.id;
+    }
+
+    // Sanitize category_id field
+    if (!cleanData.category_id || typeof cleanData.category_id !== 'string' || cleanData.category_id.trim() === '' || cleanData.category_id.length !== 36) {
+      cleanData.category_id = null;
+    }
+
+    // Sanitize author_id field
+    if (!cleanData.author_id || typeof cleanData.author_id !== 'string' || cleanData.author_id.trim() === '' || cleanData.author_id.length !== 36) {
+      const { data: firstProfile } = await supabase.from('profiles').select('id').limit(1).maybeSingle();
+      if (firstProfile?.id) {
+        cleanData.author_id = firstProfile.id;
+      } else {
+        delete cleanData.author_id;
+      }
+    }
+
+    if (postData.id && typeof postData.id === 'string' && postData.id.length === 36) {
       const { data, error } = await supabase
         .from('posts')
-        .update(postData)
+        .update(cleanData)
         .eq('id', postData.id)
         .select();
       if (error) throw error;
       return data[0];
     } else {
-      const { id, ...newPost } = postData;
       const { data, error } = await supabase
         .from('posts')
-        .insert([newPost])
+        .insert([cleanData])
         .select();
       if (error) throw error;
       return data[0];
