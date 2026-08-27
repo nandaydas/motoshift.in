@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getContactSubmissionsAdmin } from '../../lib/supabase';
+import { getContactSubmissionsAdmin, updateContactStatusAdmin } from '../../lib/supabase';
 import { useApp } from '../../context/AppContext';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -9,18 +9,21 @@ export default function ContactSubmissionsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function load() {
-      setLoading(true);
-      const data = await getContactSubmissionsAdmin();
-      setMessages(data);
-      setLoading(false);
-    }
     load();
   }, []);
 
-  const toggleRead = (id) => {
-    setMessages(messages.map(m => m.id === id ? { ...m, status: m.status === 'read' ? 'unread' : 'read' } : m));
-    showToast('Message status updated', 'info');
+  async function load() {
+    setLoading(true);
+    const data = await getContactSubmissionsAdmin();
+    setMessages(data);
+    setLoading(false);
+  }
+
+  const toggleRead = async (id, currentStatus) => {
+    const newStatus = currentStatus === 'read' ? 'unread' : 'read';
+    await updateContactStatusAdmin(id, newStatus);
+    setMessages(messages.map(m => m.id === id ? { ...m, status: newStatus } : m));
+    showToast(`Message marked as ${newStatus}`, 'info');
   };
 
   return (
@@ -33,7 +36,7 @@ export default function ContactSubmissionsPage() {
 
       {loading ? (
         <div className="py-20 text-center text-gray-400 font-mono text-sm animate-pulse">
-          Loading contact inbox...
+          Loading contact inbox from Supabase...
         </div>
       ) : messages.length > 0 ? (
         <div className="space-y-4">
@@ -48,10 +51,10 @@ export default function ContactSubmissionsPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-gray-500 font-mono text-[11px]">
-                    {m.created_at ? formatDistanceToNow(new Date(m.created_at), { addSuffix: true }) : 'Recently'}
+                    {m.created_at ? formatDistanceToNow(new Date(m.created_at), { addSuffix: true }) : ''}
                   </span>
                   <button
-                    onClick={() => toggleRead(m.id)}
+                    onClick={() => toggleRead(m.id, m.status)}
                     className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                       m.status === 'unread' ? 'bg-moto-orange text-white' : 'bg-moto-border text-gray-400'
                     }`}
@@ -75,7 +78,7 @@ export default function ContactSubmissionsPage() {
         </div>
       ) : (
         <div className="py-20 text-center text-gray-500 italic text-sm">
-          No contact submissions received yet.
+          No contact form submissions found in database.
         </div>
       )}
 

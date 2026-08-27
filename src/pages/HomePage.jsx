@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { getPosts, getCategories, subscribeNewsletter } from '../lib/supabase';
 import { useApp } from '../context/AppContext';
 import ArticleCard from '../components/common/ArticleCard';
-import { Flame, Compass, Zap, TrendingUp, CheckCircle2 } from 'lucide-react';
+import { Flame, Compass, Zap, TrendingUp, CheckCircle2, FileText } from 'lucide-react';
 
 export default function HomePage() {
   const { categories, showToast } = useApp();
@@ -25,10 +25,7 @@ export default function HomePage() {
 
   const heroPost = posts[0];
   const headlinePosts = posts.slice(1, 4);
-  const reviewPosts = posts.filter(p => p.category?.slug === 'reviews' || p.category_id === 'cat-1').slice(0, 3);
-  const routePosts = posts.filter(p => p.category?.slug === 'routes' || p.category_id === 'cat-2').slice(0, 3);
-  const culturePosts = posts.filter(p => p.category?.slug === 'culture' || p.category_id === 'cat-3').slice(0, 3);
-  const gearPosts = posts.filter(p => p.category?.slug === 'gear' || p.category_id === 'cat-4').slice(0, 3);
+  const reviewPosts = posts.filter(p => p.category?.slug === 'reviews').slice(0, 3);
 
   const filteredPosts = activeCategory === 'all' 
     ? posts 
@@ -45,13 +42,13 @@ export default function HomePage() {
   return (
     <div className="min-h-screen space-y-12 pb-12">
       
-      {/* Hero Section: Featured Main Story + Top Headlines Sidebar */}
+      {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 pt-6">
         {loading ? (
           <div className="h-[480px] bg-moto-card rounded-xl border border-moto-border animate-pulse flex items-center justify-center text-gray-500 font-mono">
-            Loading MotoShift featured stories...
+            Loading stories from Supabase...
           </div>
-        ) : (
+        ) : posts.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Hero Main Feature (2 cols) */}
             <div className="lg:col-span-2">
@@ -66,7 +63,7 @@ export default function HomePage() {
                     <Flame className="text-moto-orange animate-pulse" size={18} />
                     <h3 className="font-heading text-lg font-bold text-white tracking-wider">Top Headlines</h3>
                   </div>
-                  <span className="text-[10px] font-mono uppercase bg-moto-orange/10 text-moto-orange px-2 py-0.5 rounded border border-moto-orange/30">Live Update</span>
+                  <span className="text-[10px] font-mono uppercase bg-moto-orange/10 text-moto-orange px-2 py-0.5 rounded border border-moto-orange/30">Live DB</span>
                 </div>
 
                 <div className="divide-y divide-moto-border/50">
@@ -99,10 +96,21 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+        ) : (
+          <div className="p-12 bg-moto-card rounded-xl border border-moto-border text-center space-y-4">
+            <FileText size={48} className="mx-auto text-gray-600" />
+            <h2 className="font-heading text-2xl text-white">No Published Stories in Database</h2>
+            <p className="text-xs text-gray-400 max-w-md mx-auto">
+              Your Supabase `posts` table is currently empty. Use the Admin CMS to write and publish your first article!
+            </p>
+            <Link to="/admin/posts/new" className="inline-block bg-moto-orange text-white text-xs font-bold uppercase tracking-wider px-5 py-2.5 rounded shadow-glow-sm">
+              Create First Article in Admin CMS
+            </Link>
+          </div>
         )}
       </section>
 
-      {/* Reviews & Test Rides Section */}
+      {/* Reviews Section */}
       {reviewPosts.length > 0 && (
         <section className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between border-b border-moto-border pb-3 mb-6">
@@ -125,7 +133,7 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* Epic Routes Highlight Banner */}
+      {/* Routes Highlight Banner */}
       <section className="max-w-7xl mx-auto px-4">
         <div className="relative rounded-2xl overflow-hidden border border-moto-border bg-gradient-to-r from-black via-moto-panel to-black p-8 md:p-12 shadow-2xl">
           <div className="relative z-10 max-w-2xl space-y-4">
@@ -141,61 +149,53 @@ export default function HomePage() {
                 <Compass size={16} />
                 <span>Explore Route Guides</span>
               </Link>
-              <Link to="/article/spiti-circuit-ktm-390-adventure-guide" className="bg-moto-card hover:bg-moto-border text-gray-200 border border-moto-border text-xs font-bold uppercase tracking-wider px-5 py-3 rounded transition-all">
-                Read Spiti Circuit Guide
-              </Link>
             </div>
           </div>
-
-          {/* Decorative background image */}
-          <img
-            src="https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?auto=format&fit=crop&w=1200&q=80"
-            alt="Spiti Route"
-            className="absolute right-0 top-0 bottom-0 w-1/2 object-cover opacity-25 mix-blend-luminosity hidden md:block"
-          />
         </div>
       </section>
 
       {/* Filterable Feed Section */}
-      <section className="max-w-7xl mx-auto px-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-moto-border pb-4 mb-6 gap-4">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="text-moto-orange" size={20} />
-            <h2 className="font-heading text-2xl font-extrabold text-white tracking-wide">
-              All Stories & Media
-            </h2>
-          </div>
+      {posts.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-moto-border pb-4 mb-6 gap-4">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="text-moto-orange" size={20} />
+              <h2 className="font-heading text-2xl font-extrabold text-white tracking-wide">
+                All Stories & Media
+              </h2>
+            </div>
 
-          {/* Category Filter Tabs */}
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setActiveCategory('all')}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-colors ${
-                activeCategory === 'all' ? 'bg-moto-orange text-white' : 'bg-moto-panel text-gray-400 hover:text-white border border-moto-border'
-              }`}
-            >
-              All
-            </button>
-            {categories.map((cat) => (
+            {/* Category Filter Tabs */}
+            <div className="flex flex-wrap gap-2">
               <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.slug)}
+                onClick={() => setActiveCategory('all')}
                 className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-colors ${
-                  activeCategory === cat.slug ? 'bg-moto-orange text-white' : 'bg-moto-panel text-gray-400 hover:text-white border border-moto-border'
+                  activeCategory === 'all' ? 'bg-moto-orange text-white' : 'bg-moto-panel text-gray-400 hover:text-white border border-moto-border'
                 }`}
               >
-                {cat.name}
+                All
               </button>
+              {categories.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setActiveCategory(cat.slug)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-colors ${
+                    activeCategory === cat.slug ? 'bg-moto-orange text-white' : 'bg-moto-panel text-gray-400 hover:text-white border border-moto-border'
+                  }`}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredPosts.map((post) => (
+              <ArticleCard key={post.id} post={post} variant="grid" />
             ))}
           </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredPosts.map((post) => (
-            <ArticleCard key={post.id} post={post} variant="grid" />
-          ))}
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Newsletter Full Banner */}
       <section className="max-w-7xl mx-auto px-4 pt-6">

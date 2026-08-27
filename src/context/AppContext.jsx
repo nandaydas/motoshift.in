@@ -8,22 +8,16 @@ export function AppProvider({ children }) {
   const [bookmarks, setBookmarks] = useState(() => {
     try {
       const saved = localStorage.getItem('motoshift_bookmarks');
-      return saved ? JSON.parse(saved) : ['post-1', 'post-2'];
+      return saved ? JSON.parse(saved) : [];
     } catch (e) {
-      return ['post-1'];
+      return [];
     }
   });
 
   const [user, setUser] = useState(() => {
     try {
       const savedUser = localStorage.getItem('motoshift_user');
-      return savedUser ? JSON.parse(savedUser) : {
-        id: 'u-1',
-        name: 'Nanday Das',
-        email: 'nanday@motoshift.in',
-        role: 'admin', // default to admin for seamless testing of both public & admin portal
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'
-      };
+      return savedUser ? JSON.parse(savedUser) : null;
     } catch (e) {
       return null;
     }
@@ -70,7 +64,7 @@ export function AppProvider({ children }) {
   const loginAsAdmin = () => {
     const adminUser = {
       id: 'admin-1',
-      name: 'Nanday Das',
+      name: 'Admin User',
       email: 'admin@motoshift.in',
       role: 'admin',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'
@@ -82,7 +76,7 @@ export function AppProvider({ children }) {
   const loginAsReader = () => {
     const readerUser = {
       id: 'reader-1',
-      name: 'Rider Community',
+      name: 'Community Reader',
       email: 'rider@motoshift.in',
       role: 'author',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80'

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
+import { getPosts } from '../../lib/supabase';
 import { 
   Search, Bookmark, ShieldCheck, User, LogOut, Menu, X, 
   Flame, Instagram, Youtube, Facebook, ChevronDown 
@@ -10,8 +11,19 @@ export default function Navbar() {
   const { categories, bookmarks, user, logout, setIsSearchOpen, setIsAuthModalOpen } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [latestPost, setLatestPost] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    async function loadLatest() {
+      const posts = await getPosts({ limit: 1 });
+      if (posts && posts.length > 0) {
+        setLatestPost(posts[0]);
+      }
+    }
+    loadLatest();
+  }, []);
 
   const formattedDate = new Date().toLocaleDateString('en-US', {
     weekday: 'short',
@@ -31,13 +43,15 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
           <div className="flex items-center gap-4">
             <span className="font-mono text-gray-500 uppercase tracking-widest text-[11px]">{formattedDate}</span>
-            <div className="hidden md:flex items-center gap-2 text-moto-orange font-medium">
-              <Flame size={13} className="animate-pulse" />
-              <span className="text-gray-300">BREAKING:</span>
-              <Link to="/article/2026-triumph-daytona-660-track-test" className="hover:underline text-gray-200 truncate max-w-xs">
-                Triumph Daytona 660 Track Test Raw Dynamics
-              </Link>
-            </div>
+            {latestPost && (
+              <div className="hidden md:flex items-center gap-2 text-moto-orange font-medium">
+                <Flame size={13} className="animate-pulse" />
+                <span className="text-gray-300">LATEST STORY:</span>
+                <Link to={`/article/${latestPost.slug}`} className="hover:underline text-gray-200 truncate max-w-xs">
+                  {latestPost.title}
+                </Link>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-4">
