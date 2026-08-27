@@ -20,6 +20,7 @@ import TermsPage from './pages/TermsPage';
 // Admin CMS Pages
 import AdminLayout from './pages/admin/AdminLayout';
 import DashboardPage from './pages/admin/DashboardPage';
+import AnalyticsPage from './pages/admin/AnalyticsPage';
 import PostsListPage from './pages/admin/PostsListPage';
 import PostEditorPage from './pages/admin/PostEditorPage';
 import CategoriesPage from './pages/admin/CategoriesPage';
@@ -52,6 +53,7 @@ export default function App() {
               {/* Admin CMS Portal Routes */}
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<DashboardPage />} />
+                <Route path="analytics" element={<AnalyticsPage />} />
                 <Route path="posts" element={<PostsListPage />} />
                 <Route path="posts/new" element={<PostEditorPage />} />
                 <Route path="posts/edit/:id" element={<PostEditorPage />} />

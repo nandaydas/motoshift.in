@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { 
-  LayoutDashboard, FileText, PlusCircle, FolderKanban, 
+  LayoutDashboard, TrendingUp, FileText, PlusCircle, FolderKanban, 
   Image as ImageIcon, MessageSquare, Mail, 
   Globe, LogOut, ShieldCheck 
 } from 'lucide-react';
@@ -14,6 +14,7 @@ export default function AdminLayout() {
 
   const navItems = [
     { label: 'Dashboard', path: '/admin', icon: LayoutDashboard },
+    { label: 'Analytics', path: '/admin/analytics', icon: TrendingUp },
     { label: 'Manage Articles', path: '/admin/posts', icon: FileText },
     { label: 'Create New Article', path: '/admin/posts/new', icon: PlusCircle },
     { label: 'Categories', path: '/admin/categories', icon: FolderKanban },
