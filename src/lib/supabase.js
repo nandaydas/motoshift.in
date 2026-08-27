@@ -415,35 +415,79 @@ export async function getMediaAdmin() {
   }
 }
 
-export async function uploadMediaAdmin(file) {
+export async function uploadMediaAdmin(file, userId = null) {
   try {
-    const filename = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('media')
-      .upload(filename, file);
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'nanday';
+    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'ml_default';
 
-    if (uploadError) {
-      console.warn('Storage upload error, saving metadata:', uploadError);
+    let publicUrl = '';
+    let publicId = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+    let width = null;
+    let height = null;
+    let bytes = file.size || 0;
+    let format = file.name.split('.').pop() || 'jpg';
+
+    // 1. Upload file to Cloudinary REST API endpoint
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', uploadPreset);
+
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (res.ok) {
+        const cloudData = await res.json();
+        publicUrl = cloudData.secure_url || cloudData.url;
+        publicId = cloudData.public_id || publicId;
+        width = cloudData.width || null;
+        height = cloudData.height || null;
+        bytes = cloudData.bytes || bytes;
+        format = cloudData.format || format;
+      } else {
+        const errText = await res.text();
+        console.warn('Cloudinary upload response not OK:', errText);
+      }
+    } catch (cloudErr) {
+      console.warn('Cloudinary network upload error:', cloudErr);
     }
 
-    const { data: publicUrlData } = supabase.storage.from('media').getPublicUrl(filename);
-    const publicUrl = publicUrlData?.publicUrl || URL.createObjectURL(file);
+    // Fallback preview URL if Cloudinary URL not generated
+    if (!publicUrl) {
+      publicUrl = URL.createObjectURL(file);
+    }
 
+    // 2. Prepare metadata record for Supabase media table
     const mediaRecord = {
-      filename,
+      filename: publicId,
       original_filename: file.name,
-      storage_path: uploadData?.path || filename,
+      storage_path: `cloudinary://${publicId}`,
       public_url: publicUrl,
-      mime_type: file.type || 'image/jpeg',
-      extension: file.name.split('.').pop(),
-      size: file.size || 0,
+      mime_type: file.type || `image/${format}`,
+      extension: format,
+      size: bytes,
+      width: width,
+      height: height,
+      uploaded_by: (userId && typeof userId === 'string' && userId.length === 36) ? userId : null,
+      is_deleted: false
     };
 
-    const { data, error } = await supabase.from('media').insert([mediaRecord]).select();
-    if (error) throw error;
+    // 3. Save uploaded image record in Supabase `media` table
+    const { data, error } = await supabase
+      .from('media')
+      .insert([mediaRecord])
+      .select();
+
+    if (error) {
+      console.error('Error recording media metadata in Supabase:', error);
+      return mediaRecord;
+    }
+
     return data[0];
   } catch (err) {
-    console.error('Media upload error:', err);
+    console.error('Media upload service error:', err);
     throw err;
   }
 }
