@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useApp } from '../../context/AppContext';
 import { 
-  TrendingUp, Users, Eye, Clock, ArrowUpRight, ArrowDownRight, 
-  RefreshCw, Download, Monitor, Smartphone, Globe, BarChart3, Calendar
+  TrendingUp, RefreshCw, Download, Monitor, Smartphone, Globe, 
+  ArrowUpRight, ArrowDownRight, Calendar, AlertCircle, BarChart3
 } from 'lucide-react';
 
 export default function AnalyticsPage() {
@@ -11,6 +11,7 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [analytics, setAnalytics] = useState(null);
+  const [apiError, setApiError] = useState(null);
 
   useEffect(() => {
     fetchAnalyticsData();
@@ -18,6 +19,7 @@ export default function AnalyticsPage() {
 
   async function fetchAnalyticsData() {
     setLoading(true);
+    setApiError(null);
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token || 'sb_publishable_v3fezo9RVI75FyozbavCbQ_z6zCEHR-';
@@ -32,106 +34,79 @@ export default function AnalyticsPage() {
         body: JSON.stringify({ name: 'Functions' })
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        if (data && !data.error) {
-          setAnalytics(data);
-        } else {
-          console.log('GA Edge Function returned status/fallback data:', data);
-        }
+      const data = await res.json();
+
+      if (res.ok && data && !data.error) {
+        setAnalytics(data);
+      } else {
+        const errorMsg = data?.error || `HTTP ${res.status}: Failed to load live Analytics from Supabase Edge Function`;
+        setApiError(errorMsg);
       }
     } catch (err) {
-      console.warn('Could not fetch Edge Function analytics directly, using live dashboard state:', err);
+      console.error('Error calling fetch-google-analytics Edge Function:', err);
+      setApiError('Network connection error to Supabase Edge Function.');
     }
     setLoading(false);
   }
 
   const handleSyncLive = async () => {
     setSyncing(true);
-    showToast('Syncing live data from Google Analytics API...', 'info');
+    showToast('Fetching live metric data from Supabase Edge Function...', 'info');
     await fetchAnalyticsData();
-    setTimeout(() => {
-      setSyncing(false);
-      showToast('Analytics synchronized with Google Analytics Edge Function!', 'success');
-    }, 1200);
+    setSyncing(false);
+    showToast('Live Analytics updated!', 'success');
   };
 
   const handleExportPDF = () => {
     window.print();
   };
 
-  // Mock / Default GA Data Structure matching your exact screenshot metrics
-  const activeUsers = analytics?.activeUsers || '1,587';
-  const sessions = analytics?.sessions || '1,684';
-  const pageViews = analytics?.pageViews || '3,082';
-  const avgDuration = analytics?.avgDuration || '2m 6s';
-  const bounceRate = analytics?.bounceRate || '89.6%';
+  // Extract totals and change metrics directly from Supabase API
+  const totals = analytics?.totals || {};
+  const change = analytics?.change || {};
 
-  const topPages = analytics?.topPages || [
-    { path: '/', views: '1,481', share: '48.1%' },
-    { path: '/article/2026-triumph-daytona-660-track-test', views: '353', share: '11.5%' },
-    { path: '/category/motorcycle-news', views: '127', share: '4.1%' },
-    { path: '/article/ducati-panigale-v4-sp2-review', views: '83', share: '2.7%' },
-    { path: '/category/superbikes', views: '62', share: '2.0%' },
-    { path: '/about', views: '47', share: '1.5%' },
-    { path: '/contact', views: '32', share: '1.0%' },
-  ];
+  const activeUsers = totals.activeUsers?.toLocaleString() ?? 0;
+  const sessions = totals.sessions?.toLocaleString() ?? 0;
+  const pageViews = totals.pageViews?.toLocaleString() ?? 0;
+  const newUsers = totals.newUsers?.toLocaleString() ?? 0;
+  const returningUsers = totals.returningUsers?.toLocaleString() ?? 0;
 
-  const topCountries = analytics?.topCountries || [
-    { country: 'Singapore', code: 'SG', users: 609, share: '38.4%', width: '38%' },
-    { country: 'Norway', code: 'NO', users: 470, share: '29.6%', width: '30%' },
-    { country: 'China', code: 'CN', users: 308, share: '19.4%', width: '19%' },
-    { country: 'India', code: 'IN', users: 77, share: '4.9%', width: '12%' },
-    { country: 'United States', code: 'US', users: 19, share: '1.2%', width: '8%' },
-    { country: 'Germany', code: 'DE', users: 8, share: '0.5%', width: '5%' },
-    { country: 'Brazil', code: 'BR', users: 3, share: '0.2%', width: '4%' },
-  ];
+  const avgSec = totals.avgSessionDuration || 0;
+  const avgDuration = `${Math.floor(avgSec / 60)}m ${Math.round(avgSec % 60)}s`;
 
-  // Daily Trend Data (July 27 to Aug 24)
-  const dailyTrends = [
-    { date: 'Jul 27', views: 0, users: 0 },
-    { date: 'Jul 28', views: 148, users: 12 },
-    { date: 'Jul 29', views: 36, users: 14 },
-    { date: 'Jul 30', views: 31, users: 27 },
-    { date: 'Jul 31', views: 33, users: 28 },
-    { date: 'Aug 1', views: 36, users: 17 },
-    { date: 'Aug 2', views: 5, users: 5 },
-    { date: 'Aug 3', views: 12, users: 6 },
-    { date: 'Aug 4', views: 34, users: 14 },
-    { date: 'Aug 5', views: 52, users: 3 },
-    { date: 'Aug 6', views: 100, users: 40 },
-    { date: 'Aug 7', views: 366, users: 60 },
-    { date: 'Aug 8', views: 115, users: 34 },
-    { date: 'Aug 9', views: 38, users: 17 },
-    { date: 'Aug 10', views: 359, users: 178 },
-    { date: 'Aug 11', views: 179, users: 74 },
-    { date: 'Aug 12', views: 120, users: 34 },
-    { date: 'Aug 13', views: 62, users: 27 },
-    { date: 'Aug 14', views: 76, users: 48 },
-    { date: 'Aug 15', views: 86, users: 80 },
-    { date: 'Aug 16', views: 82, users: 72 },
-    { date: 'Aug 17', views: 104, users: 66 },
-    { date: 'Aug 18', views: 146, users: 73 },
-    { date: 'Aug 19', views: 118, users: 109 },
-    { date: 'Aug 20', views: 150, users: 92 },
-    { date: 'Aug 21', views: 82, users: 79 },
-    { date: 'Aug 22', views: 162, users: 128 },
-    { date: 'Aug 23', views: 100, users: 89 },
-    { date: 'Aug 24', views: 76, users: 56 },
-  ];
+  const bounceVal = totals.bounceRate || 0;
+  const bounceRate = typeof bounceVal === 'number' ? `${(bounceVal * (bounceVal > 1 ? 1 : 100)).toFixed(1)}%` : '0%';
+
+  const timeseries = Array.isArray(analytics?.timeseries) ? analytics.timeseries : [];
+  const topPages = Array.isArray(analytics?.topPages) ? analytics.topPages : [];
+  const topCountries = Array.isArray(analytics?.country) ? analytics.country : [];
+  const trafficSources = Array.isArray(analytics?.trafficSource) ? analytics.trafficSource : [];
+  const deviceCategories = Array.isArray(analytics?.deviceCategory) ? analytics.deviceCategory : [];
+
+  const renderPercentBadge = (changeItem) => {
+    const pct = changeItem?.percent;
+    if (pct === null || pct === undefined) return <span className="text-gray-500 font-mono text-xs">--</span>;
+    const isPos = pct >= 0;
+    return (
+      <div className={`flex items-center gap-0.5 text-xs font-mono font-bold ${isPos ? 'text-emerald-400' : 'text-red-400'}`}>
+        {isPos ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+        <span>{isPos ? '+' : ''}{pct.toFixed(1)}%</span>
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6 pb-12">
       
-      {/* Header Bar */}
+      {/* Top Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-moto-border pb-4">
         <div className="flex items-center gap-3">
           <h1 className="font-heading text-3xl text-white font-extrabold tracking-wide">
             Analytics
           </h1>
-          <div className="flex items-center gap-1 px-3 py-1 bg-[#141414] border border-moto-border rounded-full text-xs text-gray-300 font-mono">
+          <div className="flex items-center gap-1.5 px-3 py-1 bg-[#141414] border border-moto-border rounded-full text-xs text-gray-300 font-mono">
             <Calendar size={13} className="text-moto-orange" />
-            <span>Last 30 Days</span>
+            <span>Supabase Live Analytics API</span>
           </div>
         </div>
 
@@ -155,57 +130,53 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      {/* Top 5 Metrics Cards */}
+      {/* Error Alert Box if Edge Function Returns Error */}
+      {apiError && (
+        <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-300 text-xs flex items-center gap-3">
+          <AlertCircle size={18} className="shrink-0 text-red-400" />
+          <div className="space-y-0.5">
+            <p className="font-bold text-red-200">Supabase Edge Function Message:</p>
+            <p className="font-mono">{apiError}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Metric Cards Grid (100% Real Live Data) */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         
         {/* Active Users */}
         <div className="p-5 bg-moto-card border border-moto-border rounded-xl space-y-2 shadow-lg">
           <p className="text-[11px] font-mono uppercase tracking-wider text-gray-400 font-bold">Active Users</p>
-          <p className="text-2xl font-extrabold text-white font-heading">{activeUsers}</p>
-          <div className="flex items-center gap-1 text-xs text-emerald-400 font-mono font-bold">
-            <ArrowUpRight size={14} />
-            <span>+10480.0%</span>
-          </div>
+          <p className="text-2xl font-extrabold text-white font-heading">{loading ? '...' : activeUsers}</p>
+          {renderPercentBadge(change.activeUsers)}
         </div>
 
         {/* Sessions */}
         <div className="p-5 bg-moto-card border border-moto-border rounded-xl space-y-2 shadow-lg">
           <p className="text-[11px] font-mono uppercase tracking-wider text-gray-400 font-bold">Sessions</p>
-          <p className="text-2xl font-extrabold text-white font-heading">{sessions}</p>
-          <div className="flex items-center gap-1 text-xs text-emerald-400 font-mono font-bold">
-            <ArrowUpRight size={14} />
-            <span>+10425.0%</span>
-          </div>
+          <p className="text-2xl font-extrabold text-white font-heading">{loading ? '...' : sessions}</p>
+          {renderPercentBadge(change.sessions)}
         </div>
 
         {/* Page Views */}
         <div className="p-5 bg-moto-card border border-moto-border rounded-xl space-y-2 shadow-lg">
           <p className="text-[11px] font-mono uppercase tracking-wider text-gray-400 font-bold">Page Views</p>
-          <p className="text-2xl font-extrabold text-emerald-400 font-heading">{pageViews}</p>
-          <div className="flex items-center gap-1 text-xs text-emerald-400 font-mono font-bold">
-            <ArrowUpRight size={14} />
-            <span>+18029.4%</span>
-          </div>
+          <p className="text-2xl font-extrabold text-emerald-400 font-heading">{loading ? '...' : pageViews}</p>
+          {renderPercentBadge(change.pageViews)}
         </div>
 
         {/* Avg Duration */}
         <div className="p-5 bg-moto-card border border-moto-border rounded-xl space-y-2 shadow-lg">
           <p className="text-[11px] font-mono uppercase tracking-wider text-gray-400 font-bold">Avg. Duration</p>
-          <p className="text-2xl font-extrabold text-white font-heading">{avgDuration}</p>
-          <div className="flex items-center gap-1 text-xs text-emerald-400 font-mono font-bold">
-            <ArrowUpRight size={14} />
-            <span>+103.5%</span>
-          </div>
+          <p className="text-2xl font-extrabold text-white font-heading">{loading ? '...' : avgDuration}</p>
+          {renderPercentBadge(change.avgSessionDuration)}
         </div>
 
         {/* Bounce Rate */}
         <div className="p-5 bg-moto-card border border-moto-border rounded-xl space-y-2 shadow-lg">
           <p className="text-[11px] font-mono uppercase tracking-wider text-gray-400 font-bold">Bounce Rate</p>
-          <p className="text-2xl font-extrabold text-white font-heading">{bounceRate}</p>
-          <div className="flex items-center gap-1 text-xs text-red-400 font-mono font-bold">
-            <ArrowDownRight size={14} />
-            <span>-4.4%</span>
-          </div>
+          <p className="text-2xl font-extrabold text-white font-heading">{loading ? '...' : bounceRate}</p>
+          {renderPercentBadge(change.bounceRate)}
         </div>
 
       </div>
@@ -225,44 +196,49 @@ export default function AnalyticsPage() {
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-3 h-3 rounded bg-emerald-500" />
-              <span className="text-gray-300">Users</span>
+              <span className="text-gray-300">Active Users</span>
             </div>
           </div>
         </div>
 
-        {/* Bar Chart Bars Container */}
-        <div className="h-64 flex items-end gap-1.5 pt-6 pb-2 border-b border-moto-border overflow-x-auto">
-          {dailyTrends.map((d, idx) => {
-            const viewHeight = Math.min(100, Math.max(8, (d.views / 370) * 100));
-            const userHeight = Math.min(100, Math.max(4, (d.users / 370) * 100));
+        {timeseries.length > 0 ? (
+          <div className="h-64 flex items-end gap-2 pt-6 pb-2 border-b border-moto-border overflow-x-auto">
+            {timeseries.map((d, idx) => {
+              const maxVal = Math.max(...timeseries.map(t => Math.max(t.pageViews || 0, t.activeUsers || 0)), 1);
+              const viewHeight = Math.min(100, Math.max(5, ((d.pageViews || 0) / maxVal) * 100));
+              const userHeight = Math.min(100, Math.max(5, ((d.activeUsers || 0) / maxVal) * 100));
 
-            return (
-              <div key={idx} className="flex-1 min-w-[20px] flex flex-col items-center gap-1 group relative">
-                
-                {/* Hover Tooltip */}
-                <div className="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity bg-black border border-moto-border p-2 rounded shadow-2xl z-30 pointer-events-none text-[10px] whitespace-nowrap font-mono text-white">
-                  <p className="font-bold text-moto-orange">{d.date}</p>
-                  <p>Views: {d.views}</p>
-                  <p>Users: {d.users}</p>
+              return (
+                <div key={idx} className="flex-1 min-w-[24px] flex flex-col items-center gap-1 group relative">
+                  <div className="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity bg-black border border-moto-border p-2 rounded shadow-2xl z-30 pointer-events-none text-[10px] whitespace-nowrap font-mono text-white">
+                    <p className="font-bold text-moto-orange">{d.date || `Day ${idx + 1}`}</p>
+                    <p>Views: {d.pageViews || 0}</p>
+                    <p>Users: {d.activeUsers || 0}</p>
+                  </div>
+
+                  <div className="w-full flex items-end justify-center gap-0.5 h-48">
+                    <div
+                      className="w-2 bg-blue-500 rounded-t group-hover:bg-blue-400 transition-all duration-300"
+                      style={{ height: `${viewHeight}%` }}
+                    />
+                    <div
+                      className="w-2 bg-emerald-500 rounded-t group-hover:bg-emerald-400 transition-all duration-300"
+                      style={{ height: `${userHeight}%` }}
+                    />
+                  </div>
+
+                  <span className="text-[9px] text-gray-500 font-mono truncate">{d.date || idx + 1}</span>
                 </div>
-
-                {/* Bars Pair */}
-                <div className="w-full flex items-end justify-center gap-0.5 h-48">
-                  <div
-                    className="w-1.5 sm:w-2 bg-blue-500 rounded-t group-hover:bg-blue-400 transition-all duration-300"
-                    style={{ height: `${viewHeight}%` }}
-                  />
-                  <div
-                    className="w-1.5 sm:w-2 bg-emerald-500 rounded-t group-hover:bg-emerald-400 transition-all duration-300"
-                    style={{ height: `${userHeight}%` }}
-                  />
-                </div>
-
-                <span className="text-[9px] text-gray-500 font-mono truncate">{d.date}</span>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="py-16 text-center text-gray-500 font-mono text-xs border border-dashed border-moto-border/60 rounded-lg bg-[#0d0d0d] space-y-2">
+            <BarChart3 size={28} className="mx-auto text-gray-600" />
+            <p className="text-gray-400 font-semibold">No timeseries traffic records returned yet by Google Analytics API.</p>
+            <p className="text-[11px] text-gray-600">As public visitors read posts on MotoShift, Google Analytics telemetry will display daily trends here.</p>
+          </div>
+        )}
       </div>
 
       {/* Middle Grid: Device Category & Top Visited Pages */}
@@ -275,69 +251,31 @@ export default function AnalyticsPage() {
           <div className="p-6 bg-moto-card border border-moto-border rounded-xl space-y-5 shadow-xl">
             <h3 className="font-heading text-sm text-white font-bold uppercase border-b border-moto-border pb-2">Device Category Breakdown</h3>
             
-            <div className="flex items-center justify-around gap-4 py-4">
-              {/* Donut Graphic */}
-              <div className="relative w-32 h-32 flex items-center justify-center">
-                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                  <path
-                    className="text-[#1f1f1f]"
-                    strokeWidth="3.8"
-                    stroke="currentColor"
-                    fill="none"
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                  <path
-                    className="text-blue-500"
-                    strokeDasharray="98, 100"
-                    strokeWidth="3.8"
-                    strokeLinecap="round"
-                    stroke="currentColor"
-                    fill="none"
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                  <path
-                    className="text-emerald-500"
-                    strokeDasharray="2, 100"
-                    strokeWidth="3.8"
-                    strokeLinecap="round"
-                    stroke="currentColor"
-                    fill="none"
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                </svg>
-                <div className="absolute text-center">
-                  <p className="text-lg font-black text-white font-heading leading-none">1,513</p>
-                  <p className="text-[9px] text-gray-400 uppercase font-mono">USERS</p>
-                </div>
-              </div>
-
-              {/* Legends */}
+            {deviceCategories.length > 0 ? (
               <div className="space-y-3 text-xs">
-                <div className="flex items-center gap-2">
-                  <Monitor size={14} className="text-blue-400" />
-                  <div>
-                    <p className="font-bold text-white">Desktop</p>
-                    <p className="text-[11px] font-mono text-gray-400">1,485 (98.1%)</p>
+                {deviceCategories.map((dev, idx) => (
+                  <div key={idx} className="flex items-center justify-between font-mono bg-[#141414] p-3 rounded border border-moto-border">
+                    <span className="text-white font-semibold capitalize flex items-center gap-2">
+                      {dev.category?.toLowerCase() === 'mobile' ? <Smartphone size={14} className="text-emerald-400" /> : <Monitor size={14} className="text-blue-400" />}
+                      <span>{dev.category || 'Desktop'}</span>
+                    </span>
+                    <span className="text-gray-400 font-bold">{dev.users || 0} users ({dev.share || '0%'})</span>
                   </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Smartphone size={14} className="text-emerald-400" />
-                  <div>
-                    <p className="font-bold text-white">Mobile</p>
-                    <p className="text-[11px] font-mono text-gray-400">28 (1.9%)</p>
-                  </div>
-                </div>
+                ))}
               </div>
-            </div>
+            ) : (
+              <div className="py-8 text-center text-gray-500 font-mono text-xs">
+                No device category distribution recorded yet.
+              </div>
+            )}
           </div>
 
           {/* User Composition */}
           <div className="p-6 bg-moto-card border border-moto-border rounded-xl space-y-3 shadow-xl">
             <h3 className="font-heading text-sm text-white font-bold uppercase border-b border-moto-border pb-2">User Composition</h3>
-            <div className="flex items-center justify-between text-xs font-mono">
-              <span className="text-gray-300">New Users: <strong className="text-white">1,501</strong> <span className="text-emerald-400 font-bold">↗ 9906.7%</span></span>
-              <span className="text-gray-300">Returning Users: <strong className="text-white">86</strong> <span className="text-gray-400 font-bold">↗ 0.0%</span></span>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono">
+              <span className="text-gray-300">New Users: <strong className="text-white">{newUsers}</strong></span>
+              <span className="text-gray-300">Returning Users: <strong className="text-white">{returningUsers}</strong></span>
             </div>
           </div>
 
@@ -349,26 +287,33 @@ export default function AnalyticsPage() {
             <div>
               <h3 className="font-heading text-sm text-white font-bold uppercase border-b border-moto-border pb-3">Top Visited Pages</h3>
               
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs text-gray-300">
-                  <thead className="border-b border-moto-border uppercase font-mono text-[10px] text-gray-400">
-                    <tr>
-                      <th className="py-2">Path</th>
-                      <th className="py-2 text-right">Views</th>
-                      <th className="py-2 text-right">Share</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-moto-border/40 font-mono text-[11px]">
-                    {topPages.map((p, idx) => (
-                      <tr key={idx} className="hover:bg-moto-panel transition-colors">
-                        <td className="py-2.5 text-white font-semibold truncate max-w-xs">{p.path}</td>
-                        <td className="py-2.5 text-right font-bold text-emerald-400">{p.views}</td>
-                        <td className="py-2.5 text-right text-gray-400">{p.share}</td>
+              {topPages.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs text-gray-300">
+                    <thead className="border-b border-moto-border uppercase font-mono text-[10px] text-gray-400">
+                      <tr>
+                        <th className="py-2">Path</th>
+                        <th className="py-2 text-right">Views</th>
+                        <th className="py-2 text-right">Share</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-moto-border/40 font-mono text-[11px]">
+                      {topPages.map((p, idx) => (
+                        <tr key={idx} className="hover:bg-moto-panel transition-colors">
+                          <td className="py-2.5 text-white font-semibold truncate max-w-xs">{p.path || p.pagePath || '/'}</td>
+                          <td className="py-2.5 text-right font-bold text-emerald-400">{p.views || p.screenPageViews || 0}</td>
+                          <td className="py-2.5 text-right text-gray-400">{p.share || '--'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="py-12 text-center text-gray-500 font-mono text-xs space-y-1">
+                  <p className="text-gray-400 font-semibold">No top visited page records returned yet.</p>
+                  <p className="text-[11px] text-gray-600">Pageviews will populate automatically as users browse public articles.</p>
+                </div>
+              )}
             </div>
 
           </div>
@@ -383,70 +328,54 @@ export default function AnalyticsPage() {
         <div className="p-6 bg-moto-card border border-moto-border rounded-xl space-y-4 shadow-xl">
           <h3 className="font-heading text-sm text-white font-bold uppercase border-b border-moto-border pb-2">Top Countries</h3>
           
-          <div className="space-y-3 text-xs">
-            {topCountries.map((c, idx) => (
-              <div key={idx} className="space-y-1">
-                <div className="flex items-center justify-between font-mono">
-                  <span className="text-white font-semibold flex items-center gap-2">
-                    <Globe size={13} className="text-moto-orange" />
-                    <span>{c.code} {c.country}</span>
-                  </span>
-                  <span className="text-gray-400">{c.users} users ({c.share})</span>
-                </div>
+          {topCountries.length > 0 ? (
+            <div className="space-y-3 text-xs">
+              {topCountries.map((c, idx) => (
+                <div key={idx} className="space-y-1">
+                  <div className="flex items-center justify-between font-mono">
+                    <span className="text-white font-semibold flex items-center gap-2">
+                      <Globe size={13} className="text-moto-orange" />
+                      <span>{c.code || ''} {c.country || 'Unknown'}</span>
+                    </span>
+                    <span className="text-gray-400">{c.users || 0} users ({c.share || '--'})</span>
+                  </div>
 
-                <div className="w-full h-1.5 bg-[#181818] rounded-full overflow-hidden">
-                  <div className="h-full bg-emerald-500 rounded-full" style={{ width: c.width }} />
+                  <div className="w-full h-1.5 bg-[#181818] rounded-full overflow-hidden">
+                    <div className="h-full bg-emerald-500 rounded-full" style={{ width: c.share || '10%' }} />
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-8 text-center text-gray-500 font-mono text-xs">
+              No country geographic telemetry recorded yet.
+            </div>
+          )}
         </div>
 
         {/* Traffic Sources */}
         <div className="p-6 bg-moto-card border border-moto-border rounded-xl space-y-4 shadow-xl">
           <h3 className="font-heading text-sm text-white font-bold uppercase border-b border-moto-border pb-2">Traffic Sources</h3>
           
-          <div className="space-y-4 text-xs">
-            <div className="space-y-1">
-              <div className="flex justify-between font-mono">
-                <span className="text-white font-semibold">Direct</span>
-                <span className="text-gray-400">1,615 sessions (95.9%)</span>
-              </div>
-              <div className="w-full h-2 bg-[#181818] rounded-full overflow-hidden">
-                <div className="h-full bg-blue-500 rounded-full" style={{ width: '96%' }} />
-              </div>
+          {trafficSources.length > 0 ? (
+            <div className="space-y-3 text-xs">
+              {trafficSources.map((s, idx) => (
+                <div key={idx} className="space-y-1">
+                  <div className="flex justify-between font-mono">
+                    <span className="text-white font-semibold">{s.source || 'Direct'}</span>
+                    <span className="text-gray-400">{s.sessions || 0} sessions ({s.share || '--'})</span>
+                  </div>
+                  <div className="w-full h-2 bg-[#181818] rounded-full overflow-hidden">
+                    <div className="h-full bg-blue-500 rounded-full" style={{ width: s.share || '20%' }} />
+                  </div>
+                </div>
+              ))}
             </div>
-
-            <div className="space-y-1">
-              <div className="flex justify-between font-mono">
-                <span className="text-white font-semibold">Organic Search</span>
-                <span className="text-gray-400">42 sessions (2.5%)</span>
-              </div>
-              <div className="w-full h-2 bg-[#181818] rounded-full overflow-hidden">
-                <div className="h-full bg-emerald-500 rounded-full" style={{ width: '15%' }} />
-              </div>
+          ) : (
+            <div className="py-8 text-center text-gray-500 font-mono text-xs">
+              No referral or organic traffic sources recorded yet.
             </div>
-
-            <div className="space-y-1">
-              <div className="flex justify-between font-mono">
-                <span className="text-white font-semibold">Social Media</span>
-                <span className="text-gray-400">18 sessions (1.1%)</span>
-              </div>
-              <div className="w-full h-2 bg-[#181818] rounded-full overflow-hidden">
-                <div className="h-full bg-amber-500 rounded-full" style={{ width: '8%' }} />
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <div className="flex justify-between font-mono">
-                <span className="text-white font-semibold">Referral</span>
-                <span className="text-gray-400">9 sessions (0.5%)</span>
-              </div>
-              <div className="w-full h-2 bg-[#181818] rounded-full overflow-hidden">
-                <div className="h-full bg-purple-500 rounded-full" style={{ width: '5%' }} />
-              </div>
-            </div>
-          </div>
+          )}
         </div>
 
       </div>
