@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { getMediaAdmin, uploadMediaAdmin, updateMediaAdmin, deleteMediaAdmin } from '../../lib/supabase';
 import { useApp } from '../../context/AppContext';
 import { 
@@ -43,22 +44,53 @@ export default function MediaLibraryPage() {
     setLoading(false);
   }
 
-  const handleUpload = async (e) => {
-    const file = e.target.files?.[0];
+  // Dropzone & Progress States (Hidden by default, shown when clicking button or uploading)
+  const [showDropzone, setShowDropzone] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStatusText, setUploadStatusText] = useState('Uploading to Cloudinary (100%)...');
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  async function processFileUpload(file) {
     if (!file) return;
 
     setUploading(true);
-    showToast('Compressing and uploading image to Cloudinary...', 'info');
+    setShowDropzone(true);
+    setUploadProgress(15);
+    setUploadStatusText('Compressing image file...');
+
+    const timer1 = setTimeout(() => {
+      setUploadProgress(45);
+      setUploadStatusText('Uploading to Cloudinary...');
+    }, 400);
+
+    const timer2 = setTimeout(() => {
+      setUploadProgress(85);
+      setUploadStatusText('Uploading to Cloudinary (100%)...');
+    }, 900);
 
     try {
       const record = await uploadMediaAdmin(file, user?.id);
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      setUploadProgress(100);
+      setUploadStatusText('Upload completed!');
+      
       setMediaList(prev => [record, ...prev]);
       showToast('Media file uploaded successfully!', 'success');
+
+      setTimeout(() => {
+        setUploading(false);
+        setUploadProgress(0);
+        setShowDropzone(false);
+      }, 1200);
     } catch (err) {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      setUploading(false);
+      setUploadProgress(0);
       showToast('Failed to upload image', 'error');
     }
-    setUploading(false);
-  };
+  }
 
   // Filter & Search Logic
   const filteredMedia = mediaList.filter(item => {
@@ -149,12 +181,76 @@ export default function MediaLibraryPage() {
           Media Library
         </h1>
 
-        <label className="bg-[#2271b1] hover:bg-[#135e96] text-white text-xs font-bold px-4 py-2 rounded shadow transition-all cursor-pointer flex items-center gap-1.5">
-          <Upload size={14} />
-          <span>{uploading ? 'Uploading...' : 'Add Media File'}</span>
-          <input type="file" accept="image/*" disabled={uploading} onChange={handleUpload} className="hidden" />
-        </label>
+        <button
+          onClick={() => setShowDropzone(prev => !prev)}
+          className="bg-moto-orange hover:bg-moto-orange-hover text-white text-xs font-bold uppercase tracking-wider px-5 py-2.5 rounded-lg shadow-glow-orange transition-all flex items-center gap-2"
+        >
+          <Upload size={16} />
+          <span>{(showDropzone || uploading) ? 'Hide Upload Area' : 'Add Media File'}</span>
+        </button>
       </div>
+
+      {/* Drop Files to Upload Box (Only shown when clicking button or uploading) */}
+      {(showDropzone || uploading) && (
+        <div
+          onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+          onDragLeave={() => setIsDragOver(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setIsDragOver(false);
+            if (e.dataTransfer.files?.[0]) processFileUpload(e.dataTransfer.files[0]);
+          }}
+          className={`relative border-2 border-dashed rounded-xl p-10 text-center transition-all ${
+            isDragOver ? 'border-moto-orange bg-moto-orange/10' : 'border-moto-border/80 bg-[#121212]'
+          }`}
+        >
+          {/* Close Icon Button */}
+          <button
+            onClick={() => setShowDropzone(false)}
+            className="absolute top-4 right-4 p-1 text-gray-500 hover:text-white rounded transition-colors"
+            title="Close upload box"
+          >
+            <X size={18} />
+          </button>
+
+          <div className="max-w-xl mx-auto space-y-4">
+            <h3 className="text-xl font-bold text-white tracking-wide">Drop files to upload</h3>
+            <p className="text-xs text-gray-500 font-mono uppercase">or</p>
+
+            <label className="inline-block bg-moto-orange hover:bg-moto-orange-hover text-white font-bold text-xs uppercase tracking-wider px-6 py-2.5 rounded-lg shadow-glow-orange cursor-pointer transition-all">
+              <span>{uploading ? 'Uploading...' : 'Select Files'}</span>
+              <input
+                type="file"
+                accept="image/*"
+                disabled={uploading}
+                onChange={(e) => {
+                  if (e.target.files?.[0]) processFileUpload(e.target.files[0]);
+                }}
+                className="hidden"
+              />
+            </label>
+
+            {/* Upload Progress Status Indicator Bar */}
+            {uploading && (
+              <div className="space-y-2 pt-2 text-left max-w-md mx-auto animate-fadeIn">
+                <div className="flex items-center justify-between text-xs font-mono">
+                  <span className="text-gray-300 font-semibold">{uploadStatusText}</span>
+                  <span className="text-moto-orange font-bold">{uploadProgress}%</span>
+                </div>
+
+                <div className="w-full h-2.5 bg-[#090909] rounded-full overflow-hidden border border-moto-border shadow-inner">
+                  <div
+                    className="h-full bg-gradient-to-r from-moto-orange to-[#ff7733] rounded-full transition-all duration-300 shadow-glow-orange"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            <p className="text-[11px] text-gray-500 font-mono">Maximum upload file size: 50 Mb.</p>
+          </div>
+        </div>
+      )}
 
       {/* Control & Filter Toolbar (WordPress Style) */}
       <div className="bg-[#111111] border border-moto-border p-3 rounded-lg flex flex-col lg:flex-row items-center justify-between gap-4 text-xs text-gray-300">
@@ -272,8 +368,8 @@ export default function MediaLibraryPage() {
         </div>
       ) : paginatedMedia.length > 0 ? (
         viewMode === 'grid' ? (
-          /* Grid View Layout */
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
+          /* Grid View Layout (Larger Thumbnail Cards) */
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-5">
             {paginatedMedia.map((item) => (
               <div
                 key={item.id}
@@ -351,35 +447,35 @@ export default function MediaLibraryPage() {
         </div>
       )}
 
-      {/* Attachment Details Modal (Clean Semi-Transparent Overlay - NO Blur) */}
-      {selectedMedia && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 animate-fadeIn">
-          <div className="w-full max-w-5xl bg-white text-gray-900 border border-gray-300 rounded-lg shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      {/* Attachment Details Modal (Full Viewport Portal + Dark Theme) */}
+      {selectedMedia && createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+          <div className="w-full max-w-5xl bg-[#141414] text-gray-100 border border-moto-border rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
             
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-gray-200 bg-white flex items-center justify-between">
-              <h3 className="font-heading text-lg text-gray-900 font-extrabold tracking-wide uppercase">Attachment details</h3>
+            <div className="px-6 py-4 border-b border-moto-border bg-[#0b0b0b] flex items-center justify-between">
+              <h3 className="font-heading text-lg text-white font-extrabold tracking-wide uppercase">Attachment details</h3>
               
               <div className="flex items-center gap-3">
                 {/* Previous & Next Item Navigation */}
                 <button
                   onClick={() => handleNavigateModal(-1)}
-                  className="p-1.5 rounded text-gray-600 hover:text-black hover:bg-gray-100 transition-colors"
+                  className="p-1.5 rounded text-gray-400 hover:text-white hover:bg-moto-panel transition-colors"
                   title="Previous item"
                 >
                   <ChevronLeft size={20} />
                 </button>
                 <button
                   onClick={() => handleNavigateModal(1)}
-                  className="p-1.5 rounded text-gray-600 hover:text-black hover:bg-gray-100 transition-colors"
+                  className="p-1.5 rounded text-gray-400 hover:text-white hover:bg-moto-panel transition-colors"
                   title="Next item"
                 >
                   <ChevronRight size={20} />
                 </button>
-                <div className="h-4 w-px bg-gray-300" />
+                <div className="h-4 w-px bg-moto-border" />
                 <button
                   onClick={() => setSelectedMedia(null)}
-                  className="p-1.5 rounded text-gray-600 hover:text-black hover:bg-gray-100 transition-colors"
+                  className="p-1.5 rounded text-gray-400 hover:text-white hover:bg-moto-panel transition-colors"
                 >
                   <X size={20} />
                 </button>
@@ -387,11 +483,11 @@ export default function MediaLibraryPage() {
             </div>
 
             {/* Modal Content Split View */}
-            <div className="flex-1 overflow-y-auto grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-gray-200">
+            <div className="flex-1 overflow-y-auto grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-moto-border">
               
               {/* Left Column: Large Image Preview */}
-              <div className="md:col-span-6 p-6 flex flex-col items-center justify-center bg-[#f8f9fa] space-y-4">
-                <div className="max-h-[420px] w-full flex items-center justify-center overflow-hidden rounded border border-gray-200 bg-white p-2 shadow-sm">
+              <div className="md:col-span-6 p-6 flex flex-col items-center justify-center bg-[#070707] space-y-4">
+                <div className="max-h-[420px] w-full flex items-center justify-center overflow-hidden rounded border border-moto-border bg-black p-2 shadow-inner">
                   <img
                     src={selectedMedia.public_url}
                     alt={selectedMedia.alt_text || selectedMedia.filename}
@@ -401,76 +497,76 @@ export default function MediaLibraryPage() {
                 <button
                   type="button"
                   onClick={copyUrlToClipboard}
-                  className="px-4 py-1.5 bg-white hover:bg-blue-50 border border-blue-600 text-xs font-semibold text-blue-600 rounded flex items-center gap-1.5 shadow-sm transition-colors"
+                  className="px-4 py-1.5 bg-[#181818] hover:bg-moto-panel border border-moto-border text-xs font-semibold text-moto-orange rounded flex items-center gap-1.5 shadow-sm transition-colors"
                 >
-                  <Edit3 size={14} className="text-blue-600" />
+                  <Edit3 size={14} className="text-moto-orange" />
                   <span>Copy Image Direct Link</span>
                 </button>
               </div>
 
               {/* Right Column: Metadata & Editable Form Fields */}
-              <div className="md:col-span-6 p-6 space-y-5 bg-white text-gray-800">
+              <div className="md:col-span-6 p-6 space-y-5 bg-[#121212] text-gray-200">
                 
                 {/* Metadata Description Block */}
-                <div className="space-y-1.5 text-xs text-gray-600 border-b border-gray-200 pb-4 font-sans">
-                  <p><strong className="text-gray-900 font-semibold">Uploaded on:</strong> {selectedMedia.created_at ? format(new Date(selectedMedia.created_at), 'MMMM dd, yyyy') : 'Recently'}</p>
-                  <p><strong className="text-gray-900 font-semibold">Uploaded by:</strong> {user?.name || 'Nanday Das'}</p>
-                  <p><strong className="text-gray-900 font-semibold">File name:</strong> {selectedMedia.original_filename || selectedMedia.filename}</p>
-                  <p><strong className="text-gray-900 font-semibold">File type:</strong> {selectedMedia.mime_type || 'image/jpeg'}</p>
-                  <p><strong className="text-gray-900 font-semibold">File size:</strong> {selectedMedia.size ? `${(selectedMedia.size / 1024).toFixed(0)} KB` : 'N/A'}</p>
-                  <p><strong className="text-gray-900 font-semibold">Dimensions:</strong> {selectedMedia.width && selectedMedia.height ? `${selectedMedia.width} by ${selectedMedia.height} pixels` : 'N/A'}</p>
+                <div className="space-y-1.5 text-xs text-gray-400 border-b border-moto-border pb-4 font-sans">
+                  <p><strong className="text-gray-200 font-semibold">Uploaded on:</strong> {selectedMedia.created_at ? format(new Date(selectedMedia.created_at), 'MMMM dd, yyyy') : 'Recently'}</p>
+                  <p><strong className="text-gray-200 font-semibold">Uploaded by:</strong> {user?.name || 'Nanday Das'}</p>
+                  <p><strong className="text-gray-200 font-semibold">File name:</strong> {selectedMedia.original_filename || selectedMedia.filename}</p>
+                  <p><strong className="text-gray-200 font-semibold">File type:</strong> {selectedMedia.mime_type || 'image/jpeg'}</p>
+                  <p><strong className="text-gray-200 font-semibold">File size:</strong> {selectedMedia.size ? `${(selectedMedia.size / 1024).toFixed(0)} KB` : 'N/A'}</p>
+                  <p><strong className="text-gray-200 font-semibold">Dimensions:</strong> {selectedMedia.width && selectedMedia.height ? `${selectedMedia.width} by ${selectedMedia.height} pixels` : 'N/A'}</p>
                 </div>
 
                 {/* Form Fields */}
                 <form onSubmit={handleSaveChanges} className="space-y-3.5 text-xs">
                   <div>
-                    <label className="block text-gray-800 font-semibold mb-1">Alternative Text</label>
+                    <label className="block text-gray-300 font-semibold mb-1">Alternative Text</label>
                     <input
                       type="text"
                       placeholder="Describe the image for accessibility..."
                       value={editForm.alt_text}
                       onChange={(e) => setEditForm({ ...editForm, alt_text: e.target.value })}
-                      className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-sm"
+                      className="w-full bg-[#080808] border border-moto-border rounded px-3 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-moto-orange text-xs"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-gray-800 font-semibold mb-1">Title</label>
+                    <label className="block text-gray-300 font-semibold mb-1">Title</label>
                     <input
                       type="text"
                       value={editForm.title}
                       onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                      className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-gray-900 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-sm"
+                      className="w-full bg-[#080808] border border-moto-border rounded px-3 py-2 text-white focus:outline-none focus:border-moto-orange text-xs"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-gray-800 font-semibold mb-1">Caption</label>
+                    <label className="block text-gray-300 font-semibold mb-1">Caption</label>
                     <textarea
                       rows={2}
                       value={editForm.caption}
                       onChange={(e) => setEditForm({ ...editForm, caption: e.target.value })}
-                      className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-gray-900 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-sm"
+                      className="w-full bg-[#080808] border border-moto-border rounded px-3 py-2 text-white focus:outline-none focus:border-moto-orange text-xs"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-gray-800 font-semibold mb-1">Description</label>
+                    <label className="block text-gray-300 font-semibold mb-1">Description</label>
                     <textarea
                       rows={3}
                       value={editForm.description}
                       onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                      className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-gray-900 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-sm"
+                      className="w-full bg-[#080808] border border-moto-border rounded px-3 py-2 text-white focus:outline-none focus:border-moto-orange text-xs"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-gray-800 font-semibold mb-1">File URL</label>
+                    <label className="block text-gray-300 font-semibold mb-1">File URL</label>
                     <input
                       type="text"
                       readOnly
                       value={selectedMedia.public_url}
-                      className="w-full bg-gray-50 border border-gray-300 rounded px-3 py-2 text-gray-600 text-[11px] font-mono cursor-default focus:outline-none"
+                      className="w-full bg-[#050505] border border-moto-border rounded px-3 py-2 text-gray-400 text-[11px] font-mono cursor-default focus:outline-none"
                     />
                   </div>
 
@@ -478,9 +574,9 @@ export default function MediaLibraryPage() {
                     <button
                       type="button"
                       onClick={copyUrlToClipboard}
-                      className="px-3.5 py-1.5 bg-white hover:bg-blue-50 border border-blue-600 rounded text-blue-600 font-semibold text-xs flex items-center gap-1.5 shadow-sm transition-colors"
+                      className="px-3 py-1.5 bg-[#181818] hover:bg-moto-panel border border-moto-border rounded text-moto-orange font-semibold text-xs flex items-center gap-1.5 transition-colors"
                     >
-                      {copied ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+                      {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
                       <span>{copied ? 'Copied to clipboard' : 'Copy URL to clipboard'}</span>
                     </button>
                   </div>
@@ -491,11 +587,11 @@ export default function MediaLibraryPage() {
             </div>
 
             {/* Modal Action Footer */}
-            <div className="px-6 py-3.5 border-t border-gray-200 bg-[#f8f9fa] flex items-center justify-between">
+            <div className="px-6 py-3.5 border-t border-moto-border bg-[#0b0b0b] flex items-center justify-between">
               <button
                 type="button"
                 onClick={handleDeletePermanently}
-                className="text-red-600 hover:text-red-700 font-semibold text-xs hover:underline"
+                className="text-red-400 hover:text-red-300 font-semibold text-xs hover:underline"
               >
                 Delete permanently
               </button>
@@ -504,14 +600,15 @@ export default function MediaLibraryPage() {
                 type="button"
                 onClick={handleSaveChanges}
                 disabled={savingEdit}
-                className="bg-[#2271b1] hover:bg-[#135e96] text-white font-bold text-xs uppercase px-6 py-2 rounded shadow transition-colors"
+                className="bg-moto-orange hover:bg-moto-orange-hover text-white font-bold text-xs uppercase px-6 py-2 rounded shadow-glow-orange transition-all"
               >
                 {savingEdit ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
 
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

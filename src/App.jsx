@@ -5,6 +5,7 @@ import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import SearchModal from './components/common/SearchModal';
 import AuthModal from './components/common/AuthModal';
+import GoogleAnalytics from './components/common/GoogleAnalytics';
 
 // Public Pages
 import HomePage from './pages/HomePage';
@@ -30,6 +31,7 @@ export default function App() {
   return (
     <Router>
       <AppProvider>
+        <GoogleAnalytics />
         <div className="min-h-screen flex flex-col bg-moto-dark text-gray-100 font-sans">
           <Navbar />
           <SearchModal />
