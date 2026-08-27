@@ -415,23 +415,82 @@ export async function getMediaAdmin() {
   }
 }
 
+// Client-Side Canvas Image Compression Utility
+async function compressImageFile(file, maxWidth = 1920, maxHeight = 1080, quality = 0.82) {
+  if (!file || !file.type || !file.type.startsWith('image/') || file.type.includes('svg') || file.type.includes('gif')) {
+    return file;
+  }
+
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+        if (height > maxHeight) {
+          width = Math.round((width * maxHeight) / height);
+          height = maxHeight;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (blob && blob.size < file.size) {
+              const compressedFile = new File([blob], file.name, {
+                type: 'image/jpeg',
+                lastModified: Date.now()
+              });
+              resolve(compressedFile);
+            } else {
+              resolve(file);
+            }
+          },
+          'image/jpeg',
+          quality
+        );
+      };
+      img.onerror = () => resolve(file);
+    };
+    reader.onerror = () => resolve(file);
+  });
+}
+
 export async function uploadMediaAdmin(file, userId = null) {
   try {
+    // 1. Client-Side Image Compression
+    const fileToUpload = await compressImageFile(file);
+
     const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'nanday';
     const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'ml_default';
+    const cloudFolder = import.meta.env.VITE_CLOUDINARY_FOLDER || 'motoshift';
 
     let publicUrl = '';
-    let publicId = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+    let publicId = `${Date.now()}_${fileToUpload.name.replace(/\s+/g, '_')}`;
     let width = null;
     let height = null;
-    let bytes = file.size || 0;
-    let format = file.name.split('.').pop() || 'jpg';
+    let bytes = fileToUpload.size || 0;
+    let format = fileToUpload.name.split('.').pop() || 'jpg';
 
-    // 1. Upload file to Cloudinary REST API endpoint
+    // 2. Upload file to Cloudinary REST API endpoint with dedicated folder
     try {
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', fileToUpload);
       formData.append('upload_preset', uploadPreset);
+      formData.append('folder', cloudFolder);
 
       const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
         method: 'POST',
@@ -456,16 +515,16 @@ export async function uploadMediaAdmin(file, userId = null) {
 
     // Fallback preview URL if Cloudinary URL not generated
     if (!publicUrl) {
-      publicUrl = URL.createObjectURL(file);
+      publicUrl = URL.createObjectURL(fileToUpload);
     }
 
-    // 2. Prepare metadata record for Supabase media table
+    // 3. Prepare metadata record for Supabase media table
     const mediaRecord = {
       filename: publicId,
       original_filename: file.name,
       storage_path: `cloudinary://${publicId}`,
       public_url: publicUrl,
-      mime_type: file.type || `image/${format}`,
+      mime_type: fileToUpload.type || `image/${format}`,
       extension: format,
       size: bytes,
       width: width,
@@ -474,7 +533,7 @@ export async function uploadMediaAdmin(file, userId = null) {
       is_deleted: false
     };
 
-    // 3. Save uploaded image record in Supabase `media` table
+    // 4. Save uploaded compressed image record in Supabase `media` table
     const { data, error } = await supabase
       .from('media')
       .insert([mediaRecord])
