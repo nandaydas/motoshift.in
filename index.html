@@ -1,171 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MotoShift.in | Coming Soon</title>
-
-    <!-- Google Fonts for sharp, modern typography -->
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MotoShift.in — Raw Motorcycle Reviews, Route Guides & Moto Culture</title>
+    <meta name="description" content="India's premier motorcycle media portal for honest bike reviews, epic route guides, news, gear tech, and two-wheeled culture." />
+    
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Oswald:wght@500;600;700&display=swap"
-        rel="stylesheet">
-
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Tailwind Configuration -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        heading: ['Oswald', 'sans-serif'],
-                    },
-                    colors: {
-                        moto: {
-                            orange: '#ff5500', // Aggressive, sporty accent color
-                            dark: '#0a0a0a',
-                            panel: '#171717'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-</head>
-
-<body
-    class="bg-moto-dark text-gray-300 font-sans antialiased selection:bg-moto-orange selection:text-white flex flex-col min-h-screen">
-
-    <!-- Main Layout: Split Screen on Desktop, Stacked on Mobile -->
-    <main class="flex-grow flex flex-col lg:flex-row w-full">
-
-        <!-- Left Side: Content & Form -->
-        <div
-            class="w-full lg:w-1/2 flex flex-col justify-between px-8 py-12 md:px-16 lg:px-24 xl:px-32 relative z-10 bg-moto-dark">
-
-            <!-- Header / Logo -->
-            <header class="flex items-center gap-3">
-                <div
-                    class="w-10 h-10 bg-moto-orange rounded flex items-center justify-center shadow-[0_0_15px_rgba(255,85,0,0.5)]">
-                    <i data-lucide="gauge" class="text-white w-6 h-6"></i>
-                </div>
-                <span class="font-heading text-2xl font-bold tracking-wider text-white uppercase">MotoShift<span
-                        class="text-moto-orange">.in</span></span>
-            </header>
-
-            <!-- Main Content -->
-            <div class="mt-20 mb-20 lg:my-auto max-w-lg">
-                <div
-                    class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-moto-panel border border-gray-800 text-sm font-medium text-gray-400 mb-6">
-                    <span class="w-2 h-2 rounded-full bg-moto-orange animate-pulse"></span>
-                    Launching Soon
-                </div>
-
-                <h1
-                    class="font-heading text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.1] mb-6 uppercase tracking-tight">
-                    Drop the <br />
-                    <span
-                        class="text-transparent bg-clip-text bg-gradient-to-r from-moto-orange to-yellow-500">Clutch.</span>
-                </h1>
-
-                <p class="text-lg md:text-xl text-gray-400 mb-10 leading-relaxed font-light">
-                    Your new home for raw motorcycle reviews, epic route guides, and unfiltered two-wheeled culture. Get
-                    on the list to be the first to know when we go live.
-                </p>
-
-                <!-- Subscribe Form -->
-                <form id="notifyForm" class="flex flex-col sm:flex-row gap-3">
-                    <div class="relative flex-grow">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <i data-lucide="mail" class="w-5 h-5 text-gray-500"></i>
-                        </div>
-                        <input type="email" id="email" placeholder="Enter your email address" required
-                            class="w-full pl-12 pr-4 py-4 bg-moto-panel border border-gray-800 rounded-lg focus:ring-2 focus:ring-moto-orange focus:border-moto-orange text-white placeholder-gray-500 transition-all outline-none">
-                    </div>
-                    <button type="submit"
-                        class="px-8 py-4 bg-moto-orange hover:bg-[#e64d00] text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 whitespace-nowrap shadow-[0_4px_14px_0_rgba(255,85,0,0.39)] hover:shadow-[0_6px_20px_rgba(255,85,0,0.23)]">
-                        Notify Me
-                        <i data-lucide="arrow-right" class="w-5 h-5"></i>
-                    </button>
-                </form>
-
-                <!-- Success Message (Hidden by default) -->
-                <div id="successMessage"
-                    class="hidden mt-4 text-emerald-400 flex items-center gap-2 text-sm font-medium">
-                    <i data-lucide="check-circle" class="w-4 h-4"></i>
-                    You're on the list! Keep an eye on your inbox.
-                </div>
-            </div>
-
-            <!-- Footer / Socials -->
-            <footer
-                class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-gray-800 pt-8">
-                <p class="text-sm text-gray-500">© 2026 MotoShift. All rights reserved.</p>
-                <div class="flex items-center gap-5">
-                    <a href="https://www.instagram.com/mr_nanday/"
-                        class="text-gray-500 hover:text-moto-orange transition-colors">
-                        <i data-lucide="instagram" class="w-5 h-5"></i>
-                        <span class="sr-only">Instagram</span>
-                    </a>
-                    <a href="https://www.facebook.com/nandaydas/"
-                        class="text-gray-500 hover:text-moto-orange transition-colors">
-                        <i data-lucide="facebook" class="w-5 h-5"></i>
-                        <span class="sr-only">Facebook</span>
-                    </a>
-                    <a href="https://www.youtube.com/@nandayvlogs8655"
-                        class="text-gray-500 hover:text-moto-orange transition-colors">
-                        <i data-lucide="youtube" class="w-5 h-5"></i>
-                        <span class="sr-only">YouTube</span>
-                    </a>
-                </div>
-            </footer>
-        </div>
-
-        <!-- Right Side: Image Showcase -->
-        <div class="w-full lg:w-1/2 relative min-h-[40vh] lg:min-h-screen">
-            <!-- Image Overlay for mood and text readability if stacked -->
-            <div
-                class="absolute inset-0 bg-gradient-to-t from-moto-dark via-moto-dark/40 to-transparent lg:bg-gradient-to-r lg:from-moto-dark lg:via-transparent lg:to-transparent z-10">
-            </div>
-
-            <!-- Cinematic Motorcycle Image from Unsplash -->
-            <img src="https://ic4.maxabout.us/autos/tw_india//K/2023/11/ktm-1390-super-duke-r-action-shot.jpg"
-                alt="Dark sleek motorcycle" class="absolute inset-0 w-full h-full object-cover object-center">
-        </div>
-
-    </main>
-
-    <!-- Initialize Icons & Basic Form Logic -->
-    <script>
-        // Initialize Lucide icons
-        lucide.createIcons();
-
-        // Simple form handling simulation
-        document.getElementById('notifyForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            const emailInput = document.getElementById('email');
-            const successMsg = document.getElementById('successMessage');
-
-            // In a real app, you would send this to your backend/Mailchimp here
-            if (emailInput.value) {
-                successMsg.classList.remove('hidden');
-                emailInput.value = '';
-
-                // Hide message after 5 seconds
-                setTimeout(() => {
-                    successMsg.classList.add('hidden');
-                }, 5000);
-            }
-        });
-    </script>
-</body>
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body class="bg-moto-dark text-gray-100 antialiased font-sans selection:bg-moto-orange selection:text-white min-h-screen">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
