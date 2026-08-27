@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "node -e \"if (process.platform !== 'win32') require('child_process').execSync('chmod +x ./node_modules/.bin/*')\"",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
