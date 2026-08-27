@@ -16,6 +16,7 @@ import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 // Admin CMS Pages
 import AdminLayout from './pages/admin/AdminLayout';
@@ -62,6 +63,9 @@ export default function App() {
                 <Route path="comments" element={<CommentsModerationPage />} />
                 <Route path="contact" element={<ContactSubmissionsPage />} />
               </Route>
+
+              {/* Catch-all 404 Route */}
+              <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </div>
 
