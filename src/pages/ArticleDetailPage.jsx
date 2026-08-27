@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { getPostBySlug, getPosts, getCommentsForPost, submitComment, incrementPostViews } from '../lib/supabase';
 import { useApp } from '../context/AppContext';
 import ArticleCard from '../components/common/ArticleCard';
-import { Clock, Eye, Bookmark, Share2, MessageSquare, Send, CheckCircle2, User, ChevronLeft } from 'lucide-react';
+import { Clock, Eye, Bookmark, Share2, MessageSquare, Send, CheckCircle2, ChevronLeft } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 export default function ArticleDetailPage() {

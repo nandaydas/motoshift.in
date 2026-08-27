@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { subscribeNewsletter } from '../../lib/supabase';
 import { useApp } from '../../context/AppContext';
-import { Instagram, Youtube, Facebook, Send, Shield, Heart } from 'lucide-react';
+import { Instagram, Youtube, Facebook, Send, Heart } from 'lucide-react';
 
 export default function Footer() {
   const { categories, showToast } = useApp();

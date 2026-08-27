@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Image as ImageIcon, Upload, Copy, Check, Trash2 } from 'lucide-react';
+import { Upload, Copy, Check } from 'lucide-react';
 
 export default function MediaLibraryPage() {
   const { showToast } = useApp();

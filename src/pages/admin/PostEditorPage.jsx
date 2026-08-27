@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getPostBySlug, getCategories, createOrUpdatePost, getAllPostsAdmin } from '../../lib/supabase';
+import { getCategories, createOrUpdatePost, getAllPostsAdmin } from '../../lib/supabase';
 import { useApp } from '../../context/AppContext';
-import { Save, ArrowLeft, Image as ImageIcon, Sparkles, Eye, CheckCircle2 } from 'lucide-react';
+import { Save, ArrowLeft, Sparkles } from 'lucide-react';
 
 export default function PostEditorPage() {
   const { id } = useParams();

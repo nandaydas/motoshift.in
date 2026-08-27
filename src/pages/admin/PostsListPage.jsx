@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllPostsAdmin, deletePostAdmin } from '../../lib/supabase';
 import { useApp } from '../../context/AppContext';
-import { PlusCircle, Search, Edit3, Trash2, Eye, ExternalLink } from 'lucide-react';
+import { PlusCircle, Search, Edit3, Trash2, ExternalLink } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 export default function PostsListPage() {

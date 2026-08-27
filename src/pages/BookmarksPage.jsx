@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { getPosts } from '../lib/supabase';
 import ArticleCard from '../components/common/ArticleCard';
-import { Bookmark, Trash2 } from 'lucide-react';
+import { Bookmark } from 'lucide-react';
 
 export default function BookmarksPage() {
   const { bookmarks, toggleBookmark } = useApp();

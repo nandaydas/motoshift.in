@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, Flame, Compass, Award, Instagram, Youtube, Facebook } from 'lucide-react';
+import { Flame, Compass, Award, Instagram, Youtube, Facebook } from 'lucide-react';
 
 export default function AboutPage() {
   return (

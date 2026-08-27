@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getContactSubmissionsAdmin } from '../../lib/supabase';
 import { useApp } from '../../context/AppContext';
-import { Mail, CheckCircle, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 export default function ContactSubmissionsPage() {

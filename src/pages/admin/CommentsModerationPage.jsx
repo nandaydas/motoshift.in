@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Check, X, Trash2, MessageSquare } from 'lucide-react';
+import { Check, Trash2 } from 'lucide-react';
 
 export default function CommentsModerationPage() {
   const { showToast } = useApp();

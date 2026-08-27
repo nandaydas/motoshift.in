@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { getPosts } from '../../lib/supabase';
-import { Search, X, ArrowRight, Tag, Clock } from 'lucide-react';
+import { Search, X, ArrowRight } from 'lucide-react';
 
 export default function SearchModal() {
   const { isSearchOpen, setIsSearchOpen, categories } = useApp();

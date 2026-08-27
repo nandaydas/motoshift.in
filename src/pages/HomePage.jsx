@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { getPosts, getCategories, subscribeNewsletter } from '../lib/supabase';
 import { useApp } from '../context/AppContext';
 import ArticleCard from '../components/common/ArticleCard';
-import { Flame, Compass, Shield, Zap, TrendingUp, Send, CheckCircle2 } from 'lucide-react';
+import { Flame, Compass, Zap, TrendingUp, CheckCircle2 } from 'lucide-react';
 
 export default function HomePage() {
   const { categories, showToast } = useApp();

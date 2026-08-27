@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllPostsAdmin, getContactSubmissionsAdmin, getPendingCommentsAdmin } from '../../lib/supabase';
-import { FileText, Eye, MessageSquare, Mail, PlusCircle, ArrowUpRight, TrendingUp, ShieldAlert } from 'lucide-react';
+import { FileText, Eye, MessageSquare, Mail, PlusCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 export default function DashboardPage() {

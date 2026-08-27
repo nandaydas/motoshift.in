@@ -3,8 +3,8 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { 
   LayoutDashboard, FileText, PlusCircle, FolderKanban, 
-  Image as ImageIcon, MessageSquare, Mail, Settings, 
-  Globe, LogOut, ShieldCheck, Flame, Bell 
+  Image as ImageIcon, MessageSquare, Mail, 
+  Globe, LogOut, ShieldCheck 
 } from 'lucide-react';
 
 export default function AdminLayout() {

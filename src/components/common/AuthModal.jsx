@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { ShieldCheck, User, X, CheckCircle, Flame } from 'lucide-react';
+import { ShieldCheck, User, X, CheckCircle } from 'lucide-react';
 
 export default function AuthModal() {
   const { isAuthModalOpen, setIsAuthModalOpen, loginAsAdmin, loginAsReader, user, logout } = useApp();

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { submitContactForm } from '../lib/supabase';
 import { useApp } from '../context/AppContext';
-import { Mail, MessageSquare, Send, CheckCircle2, MapPin, Instagram, Youtube, Facebook } from 'lucide-react';
+import { Mail, Send, CheckCircle2, MapPin, Instagram, Youtube, Facebook } from 'lucide-react';
 
 export default function ContactPage() {
   const { showToast } = useApp();

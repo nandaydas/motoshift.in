@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getCategories, supabase } from '../../lib/supabase';
 import { useApp } from '../../context/AppContext';
-import { FolderKanban, Plus, Edit2, Trash2, CheckCircle2 } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 export default function CategoriesPage() {
   const { showToast } = useApp();
