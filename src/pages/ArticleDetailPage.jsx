@@ -5,6 +5,7 @@ import { useApp } from '../context/AppContext';
 import ArticleCard from '../components/common/ArticleCard';
 import { Clock, Eye, Bookmark, Share2, MessageSquare, Send, CheckCircle2, ChevronLeft } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { marked } from 'marked';
 
 export default function ArticleDetailPage() {
   const { slug } = useParams();
@@ -187,10 +188,10 @@ export default function ArticleDetailPage() {
           </div>
         )}
 
-        {/* Rendered HTML Content */}
+        {/* Rendered Article Content (Markdown / HTML) */}
         <div 
           className="prose prose-invert max-w-none prose-headings:font-heading prose-headings:text-white prose-p:text-gray-300 prose-p:leading-relaxed prose-a:text-moto-orange prose-blockquote:border-l-4 prose-blockquote:border-moto-orange prose-blockquote:bg-moto-card prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded-r font-sans text-base space-y-6"
-          dangerouslySetInnerHTML={{ __html: post.content }}
+          dangerouslySetInnerHTML={{ __html: post.content ? (post.content.trim().startsWith('<') ? post.content : marked.parse(post.content)) : '' }}
         />
 
         {/* Author Bio Box */}

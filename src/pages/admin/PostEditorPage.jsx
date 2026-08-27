@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getCategories, createOrUpdatePost, getAllPostsAdmin } from '../../lib/supabase';
 import { useApp } from '../../context/AppContext';
+import TiptapEditor from '../../components/editor/TiptapEditor';
 import { Save, ArrowLeft, Sparkles } from 'lucide-react';
 
 export default function PostEditorPage() {
@@ -182,35 +183,14 @@ export default function PostEditorPage() {
             </div>
           </div>
 
-          {/* Content HTML Editor Area */}
-          <div className="p-6 bg-moto-card border border-moto-border rounded-xl space-y-3">
-            <div className="flex items-center justify-between pb-2 border-b border-moto-border">
-              <label className="text-xs uppercase font-mono text-gray-400 font-bold">Editorial Article Content (HTML Support)</label>
-              <div className="flex gap-2 text-xs">
-                <button
-                  type="button"
-                  onClick={() => setPostData(prev => ({ ...prev, content: prev.content + '<h2>New Heading Section</h2><p>Content text...</p>' }))}
-                  className="px-2 py-1 bg-moto-panel border border-moto-border rounded text-[11px] hover:text-moto-orange"
-                >
-                  + Heading
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPostData(prev => ({ ...prev, content: prev.content + '<blockquote>"Memorable quote from test rider."</blockquote>' }))}
-                  className="px-2 py-1 bg-moto-panel border border-moto-border rounded text-[11px] hover:text-moto-orange"
-                >
-                  + Quote
-                </button>
-              </div>
-            </div>
-
-            <textarea
-              rows={14}
-              required
-              placeholder="<p>Write your detailed article story here...</p>"
-              value={postData.content}
-              onChange={(e) => setPostData({ ...postData, content: e.target.value })}
-              className="w-full bg-moto-panel border border-moto-border rounded-lg p-4 text-xs font-mono text-gray-200 placeholder-gray-600 focus:outline-none focus:border-moto-orange leading-relaxed"
+          {/* Content Tiptap WYSIWYG Editor Area */}
+          <div className="space-y-2">
+            <label className="block text-xs uppercase font-mono text-gray-400 font-bold mb-1">
+              Article Content (Tiptap Visual Editor • Markdown Storage)
+            </label>
+            <TiptapEditor
+              markdown={postData.content}
+              onChange={(md) => setPostData(prev => ({ ...prev, content: md }))}
             />
           </div>
 
