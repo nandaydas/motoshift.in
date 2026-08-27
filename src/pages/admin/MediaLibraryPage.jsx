@@ -351,35 +351,35 @@ export default function MediaLibraryPage() {
         </div>
       )}
 
-      {/* Attachment Details Modal (Side-by-side Layout) */}
+      {/* Attachment Details Modal (Light High-Contrast CMS Modal) */}
       {selectedMedia && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
-          <div className="w-full max-w-5xl bg-[#141414] border border-moto-border rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fadeIn">
+          <div className="w-full max-w-5xl bg-white text-gray-900 border border-gray-200 rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-moto-border bg-[#0d0d0d] flex items-center justify-between">
-              <h3 className="font-heading text-lg text-white font-bold">Attachment details</h3>
+            <div className="px-6 py-4 border-b border-gray-200 bg-white flex items-center justify-between">
+              <h3 className="font-heading text-lg text-gray-900 font-extrabold tracking-wide uppercase">Attachment details</h3>
               
               <div className="flex items-center gap-3">
                 {/* Previous & Next Item Navigation */}
                 <button
                   onClick={() => handleNavigateModal(-1)}
-                  className="p-1 rounded text-gray-400 hover:text-white hover:bg-moto-panel"
+                  className="p-1.5 rounded text-gray-600 hover:text-black hover:bg-gray-100 transition-colors"
                   title="Previous item"
                 >
                   <ChevronLeft size={20} />
                 </button>
                 <button
                   onClick={() => handleNavigateModal(1)}
-                  className="p-1 rounded text-gray-400 hover:text-white hover:bg-moto-panel"
+                  className="p-1.5 rounded text-gray-600 hover:text-black hover:bg-gray-100 transition-colors"
                   title="Next item"
                 >
                   <ChevronRight size={20} />
                 </button>
-                <div className="h-4 w-px bg-moto-border" />
+                <div className="h-4 w-px bg-gray-300" />
                 <button
                   onClick={() => setSelectedMedia(null)}
-                  className="p-1 rounded text-gray-400 hover:text-white hover:bg-moto-panel"
+                  className="p-1.5 rounded text-gray-600 hover:text-black hover:bg-gray-100 transition-colors"
                 >
                   <X size={20} />
                 </button>
@@ -387,90 +387,90 @@ export default function MediaLibraryPage() {
             </div>
 
             {/* Modal Content Split View */}
-            <div className="flex-1 overflow-y-auto grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-moto-border">
+            <div className="flex-1 overflow-y-auto grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-gray-200">
               
               {/* Left Column: Large Image Preview */}
-              <div className="md:col-span-6 p-6 flex flex-col items-center justify-center bg-[#090909] space-y-4">
-                <div className="max-h-[420px] w-full flex items-center justify-center overflow-hidden rounded border border-moto-border/60 bg-black">
+              <div className="md:col-span-6 p-6 flex flex-col items-center justify-center bg-[#f8f9fa] space-y-4">
+                <div className="max-h-[420px] w-full flex items-center justify-center overflow-hidden rounded border border-gray-200 bg-white p-2 shadow-sm">
                   <img
                     src={selectedMedia.public_url}
                     alt={selectedMedia.alt_text || selectedMedia.filename}
-                    className="max-h-[400px] w-auto object-contain"
+                    className="max-h-[390px] w-auto object-contain rounded"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={copyUrlToClipboard}
-                  className="px-4 py-1.5 bg-[#1a1a1a] hover:bg-moto-border border border-moto-border text-xs font-semibold text-gray-200 rounded flex items-center gap-1.5"
+                  className="px-4 py-1.5 bg-white hover:bg-blue-50 border border-blue-600 text-xs font-semibold text-blue-600 rounded flex items-center gap-1.5 shadow-sm transition-colors"
                 >
-                  <Edit3 size={14} className="text-moto-orange" />
+                  <Edit3 size={14} className="text-blue-600" />
                   <span>Copy Image Direct Link</span>
                 </button>
               </div>
 
               {/* Right Column: Metadata & Editable Form Fields */}
-              <div className="md:col-span-6 p-6 space-y-6 bg-[#141414]">
+              <div className="md:col-span-6 p-6 space-y-5 bg-white text-gray-800">
                 
                 {/* Metadata Description Block */}
-                <div className="space-y-1 text-xs text-gray-400 border-b border-moto-border pb-4 font-sans">
-                  <p><strong className="text-gray-300 font-semibold">Uploaded on:</strong> {selectedMedia.created_at ? format(new Date(selectedMedia.created_at), 'MMMM dd, yyyy') : 'Recently'}</p>
-                  <p><strong className="text-gray-300 font-semibold">Uploaded by:</strong> {user?.name || 'Nanday Das'}</p>
-                  <p><strong className="text-gray-300 font-semibold">File name:</strong> {selectedMedia.original_filename || selectedMedia.filename}</p>
-                  <p><strong className="text-gray-300 font-semibold">File type:</strong> {selectedMedia.mime_type || 'image/jpeg'}</p>
-                  <p><strong className="text-gray-300 font-semibold">File size:</strong> {selectedMedia.size ? `${(selectedMedia.size / 1024).toFixed(0)} KB` : 'N/A'}</p>
-                  <p><strong className="text-gray-300 font-semibold">Dimensions:</strong> {selectedMedia.width && selectedMedia.height ? `${selectedMedia.width} by ${selectedMedia.height} pixels` : 'N/A'}</p>
+                <div className="space-y-1.5 text-xs text-gray-600 border-b border-gray-200 pb-4 font-sans">
+                  <p><strong className="text-gray-900 font-semibold">Uploaded on:</strong> {selectedMedia.created_at ? format(new Date(selectedMedia.created_at), 'MMMM dd, yyyy') : 'Recently'}</p>
+                  <p><strong className="text-gray-900 font-semibold">Uploaded by:</strong> {user?.name || 'Nanday Das'}</p>
+                  <p><strong className="text-gray-900 font-semibold">File name:</strong> {selectedMedia.original_filename || selectedMedia.filename}</p>
+                  <p><strong className="text-gray-900 font-semibold">File type:</strong> {selectedMedia.mime_type || 'image/jpeg'}</p>
+                  <p><strong className="text-gray-900 font-semibold">File size:</strong> {selectedMedia.size ? `${(selectedMedia.size / 1024).toFixed(0)} KB` : 'N/A'}</p>
+                  <p><strong className="text-gray-900 font-semibold">Dimensions:</strong> {selectedMedia.width && selectedMedia.height ? `${selectedMedia.width} by ${selectedMedia.height} pixels` : 'N/A'}</p>
                 </div>
 
                 {/* Form Fields */}
-                <form onSubmit={handleSaveChanges} className="space-y-3 text-xs">
+                <form onSubmit={handleSaveChanges} className="space-y-3.5 text-xs">
                   <div>
-                    <label className="block text-gray-300 font-semibold mb-1">Alternative Text</label>
+                    <label className="block text-gray-800 font-semibold mb-1">Alternative Text</label>
                     <input
                       type="text"
                       placeholder="Describe the image for accessibility..."
                       value={editForm.alt_text}
                       onChange={(e) => setEditForm({ ...editForm, alt_text: e.target.value })}
-                      className="w-full bg-[#0d0d0d] border border-moto-border rounded px-3 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500"
+                      className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-sm"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-gray-300 font-semibold mb-1">Title</label>
+                    <label className="block text-gray-800 font-semibold mb-1">Title</label>
                     <input
                       type="text"
                       value={editForm.title}
                       onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                      className="w-full bg-[#0d0d0d] border border-moto-border rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                      className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-gray-900 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-sm"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-gray-300 font-semibold mb-1">Caption</label>
+                    <label className="block text-gray-800 font-semibold mb-1">Caption</label>
                     <textarea
                       rows={2}
                       value={editForm.caption}
                       onChange={(e) => setEditForm({ ...editForm, caption: e.target.value })}
-                      className="w-full bg-[#0d0d0d] border border-moto-border rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                      className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-gray-900 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-sm"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-gray-300 font-semibold mb-1">Description</label>
+                    <label className="block text-gray-800 font-semibold mb-1">Description</label>
                     <textarea
                       rows={3}
                       value={editForm.description}
                       onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                      className="w-full bg-[#0d0d0d] border border-moto-border rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                      className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-gray-900 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-sm"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-gray-300 font-semibold mb-1">File URL</label>
+                    <label className="block text-gray-800 font-semibold mb-1">File URL</label>
                     <input
                       type="text"
                       readOnly
                       value={selectedMedia.public_url}
-                      className="w-full bg-[#090909] border border-moto-border rounded px-3 py-2 text-gray-400 text-[11px] font-mono cursor-default focus:outline-none"
+                      className="w-full bg-gray-50 border border-gray-300 rounded px-3 py-2 text-gray-600 text-[11px] font-mono cursor-default focus:outline-none"
                     />
                   </div>
 
@@ -478,9 +478,9 @@ export default function MediaLibraryPage() {
                     <button
                       type="button"
                       onClick={copyUrlToClipboard}
-                      className="px-3 py-1.5 bg-[#1f1f1f] hover:bg-moto-border border border-moto-border rounded text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1.5"
+                      className="px-3.5 py-1.5 bg-white hover:bg-blue-50 border border-blue-600 rounded text-blue-600 font-semibold text-xs flex items-center gap-1.5 shadow-sm transition-colors"
                     >
-                      {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                      {copied ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
                       <span>{copied ? 'Copied to clipboard' : 'Copy URL to clipboard'}</span>
                     </button>
                   </div>
@@ -491,11 +491,11 @@ export default function MediaLibraryPage() {
             </div>
 
             {/* Modal Action Footer */}
-            <div className="px-6 py-3 border-t border-moto-border bg-[#0d0d0d] flex items-center justify-between">
+            <div className="px-6 py-3.5 border-t border-gray-200 bg-[#f8f9fa] flex items-center justify-between">
               <button
                 type="button"
                 onClick={handleDeletePermanently}
-                className="text-red-400 hover:text-red-300 font-semibold text-xs hover:underline"
+                className="text-red-600 hover:text-red-700 font-semibold text-xs hover:underline"
               >
                 Delete permanently
               </button>
@@ -504,7 +504,7 @@ export default function MediaLibraryPage() {
                 type="button"
                 onClick={handleSaveChanges}
                 disabled={savingEdit}
-                className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase px-5 py-2 rounded shadow transition-all"
+                className="bg-[#2271b1] hover:bg-[#135e96] text-white font-bold text-xs uppercase px-6 py-2 rounded shadow transition-colors"
               >
                 {savingEdit ? 'Saving...' : 'Save Changes'}
               </button>
