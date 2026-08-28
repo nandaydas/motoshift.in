@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { signInUser, signUpUser } from '../../lib/supabase';
-import { ShieldCheck, User, X, CheckCircle, Lock, Mail } from 'lucide-react';
+import { signInUser, signUpUser, resetPassword } from '../../lib/supabase';
+import { ShieldCheck, User, X, CheckCircle, Lock, Mail, Eye, EyeOff } from 'lucide-react';
 
 export default function AuthModal() {
   const { isAuthModalOpen, setIsAuthModalOpen, loginAsAdmin, user, setUser, logout, showToast } = useApp();
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -35,6 +37,21 @@ export default function AuthModal() {
     setLoading(false);
   };
 
+  const handleResetPasswordSubmit = async (e) => {
+    e.preventDefault();
+    if (!email) return;
+
+    setLoading(true);
+    try {
+      await resetPassword({ email });
+      showToast('Password reset link sent to your email!', 'success');
+      setIsForgotPassword(false);
+    } catch (err) {
+      showToast(err.message || 'Failed to send reset link', 'error');
+    }
+    setLoading(false);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fadeIn">
       <div className="w-full max-w-md bg-moto-panel border border-moto-border rounded-xl shadow-2xl overflow-hidden relative">
@@ -53,10 +70,20 @@ export default function AuthModal() {
             M
           </div>
           <h3 className="font-heading text-xl text-white">
-            {user ? 'Account Profile' : isSignUp ? 'Create MotoShift Account' : 'Sign In to MotoShift'}
+            {user
+              ? 'Account Profile'
+              : isForgotPassword
+              ? 'Reset Password'
+              : isSignUp
+              ? 'Create MotoShift Account'
+              : 'Sign In to MotoShift'}
           </h3>
           <p className="text-xs text-gray-400 mt-1">
-            {user ? 'Logged in session details' : 'Access reader bookmarks or administrative content management'}
+            {user
+              ? 'Logged in session details'
+              : isForgotPassword
+              ? 'Enter your email to receive password reset instructions'
+              : 'Access reader bookmarks or administrative content management'}
           </p>
         </div>
 
@@ -92,6 +119,40 @@ export default function AuthModal() {
                 Sign Out
               </button>
             </div>
+          ) : isForgotPassword ? (
+            <div className="space-y-4">
+              <form onSubmit={handleResetPasswordSubmit} className="space-y-3">
+                <div>
+                  <label className="block text-[11px] text-gray-400 mb-1">Email Address</label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="user@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full bg-moto-card border border-moto-border rounded px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-moto-orange"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-moto-orange hover:bg-moto-orange-hover text-white font-bold text-xs uppercase py-2.5 rounded transition-colors shadow-glow-sm"
+                >
+                  {loading ? 'Sending Link...' : 'Send Reset Link'}
+                </button>
+              </form>
+
+              <div className="text-center pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsForgotPassword(false)}
+                  className="text-xs text-moto-orange hover:underline font-medium"
+                >
+                  Back to Sign In
+                </button>
+              </div>
+            </div>
           ) : (
             <>
               {/* Preset Switcher */}
@@ -113,10 +174,10 @@ export default function AuthModal() {
 
               <div className="relative flex items-center justify-center my-3">
                 <div className="border-t border-moto-border w-full" />
-                <span className="bg-moto-panel px-3 text-[10px] uppercase font-mono text-gray-500">SUPABASE AUTHENTICATION</span>
+                <span className="bg-moto-panel px-3 text-[10px] uppercase font-mono text-gray-500">ACCOUNT ACCESS</span>
               </div>
 
-              {/* Supabase Email Input Form */}
+              {/* Email Input Form */}
               <form onSubmit={handleAuthSubmit} className="space-y-3">
                 {isSignUp && (
                   <div>
@@ -145,15 +206,36 @@ export default function AuthModal() {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] text-gray-400 mb-1">Password</label>
-                  <input
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-moto-card border border-moto-border rounded px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-moto-orange"
-                  />
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-[11px] text-gray-400">Password</label>
+                    {!isSignUp && (
+                      <button
+                        type="button"
+                        onClick={() => setIsForgotPassword(true)}
+                        className="text-[11px] text-moto-orange hover:underline font-medium"
+                      >
+                        Forgot password?
+                      </button>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full bg-moto-card border border-moto-border rounded px-3 py-2 pr-10 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-moto-orange"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                      title={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
                 </div>
 
                 <button
@@ -161,7 +243,7 @@ export default function AuthModal() {
                   disabled={loading}
                   className="w-full bg-moto-panel hover:bg-moto-border text-white border border-moto-border font-bold text-xs uppercase py-2.5 rounded transition-colors shadow-glow-sm"
                 >
-                  {loading ? 'Authenticating...' : isSignUp ? 'Create Supabase Account' : 'Sign In with Supabase'}
+                  {loading ? 'Authenticating...' : isSignUp ? 'Create Account' : 'Sign In'}
                 </button>
               </form>
 
@@ -181,3 +263,4 @@ export default function AuthModal() {
     </div>
   );
 }
+

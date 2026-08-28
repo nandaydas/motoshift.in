@@ -36,7 +36,7 @@ export default function ContactSubmissionsPage() {
 
       {loading ? (
         <div className="py-20 text-center text-gray-400 font-mono text-sm animate-pulse">
-          Loading contact inbox from Supabase...
+          Loading contact inbox...
         </div>
       ) : messages.length > 0 ? (
         <div className="space-y-4">

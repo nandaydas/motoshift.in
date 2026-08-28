@@ -23,7 +23,7 @@ export default function PrivacyPage() {
 
         <h3 className="font-heading text-lg text-white font-bold">3. Data Security</h3>
         <p>
-          Your data is stored securely using Supabase database infrastructure and encrypted connection protocols. We do not sell or rent reader emails to third parties.
+          Your data is stored securely using encrypted cloud database infrastructure and SSL/TLS connection protocols. We do not sell or rent reader emails to third parties.
         </p>
       </div>
     </div>

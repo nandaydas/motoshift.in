@@ -117,7 +117,7 @@ export default function AdminLayout() {
           <div className="flex items-center gap-4 text-xs">
             <div className="hidden sm:flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-3 py-1 rounded font-mono text-[11px]">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              <span>Supabase Live DB Connected</span>
+              <span>Live DB Connected</span>
             </div>
           </div>
         </header>

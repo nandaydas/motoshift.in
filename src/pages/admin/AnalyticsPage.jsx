@@ -39,19 +39,19 @@ export default function AnalyticsPage() {
       if (res.ok && data && !data.error) {
         setAnalytics(data);
       } else {
-        const errorMsg = data?.error || `HTTP ${res.status}: Failed to load live Analytics from Supabase Edge Function`;
+        const errorMsg = data?.error || `HTTP ${res.status}: Failed to load live Analytics API`;
         setApiError(errorMsg);
       }
     } catch (err) {
       console.error('Error calling fetch-google-analytics Edge Function:', err);
-      setApiError('Network connection error to Supabase Edge Function.');
+      setApiError('Network connection error to Analytics API.');
     }
     setLoading(false);
   }
 
   const handleSyncLive = async () => {
     setSyncing(true);
-    showToast('Fetching live metric data from Supabase Edge Function...', 'info');
+    showToast('Fetching live metric data from Analytics API...', 'info');
     await fetchAnalyticsData();
     setSyncing(false);
     showToast('Live Analytics updated!', 'success');
@@ -106,7 +106,7 @@ export default function AnalyticsPage() {
           </h1>
           <div className="flex items-center gap-1.5 px-3 py-1 bg-[#141414] border border-moto-border rounded-full text-xs text-gray-300 font-mono">
             <Calendar size={13} className="text-moto-orange" />
-            <span>Supabase Live Analytics API</span>
+            <span>Live Analytics API</span>
           </div>
         </div>
 
@@ -135,7 +135,7 @@ export default function AnalyticsPage() {
         <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-300 text-xs flex items-center gap-3">
           <AlertCircle size={18} className="shrink-0 text-red-400" />
           <div className="space-y-0.5">
-            <p className="font-bold text-red-200">Supabase Edge Function Message:</p>
+            <p className="font-bold text-red-200">Analytics API Message:</p>
             <p className="font-mono">{apiError}</p>
           </div>
         </div>

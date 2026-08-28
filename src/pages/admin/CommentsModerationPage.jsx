@@ -42,7 +42,7 @@ export default function CommentsModerationPage() {
 
       {loading ? (
         <div className="py-20 text-center text-gray-400 font-mono text-sm animate-pulse">
-          Loading comments from Supabase...
+          Loading comments...
         </div>
       ) : comments.length > 0 ? (
         <div className="space-y-4">

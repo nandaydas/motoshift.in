@@ -46,7 +46,7 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-4 pt-6">
         {loading ? (
           <div className="h-[480px] bg-moto-card rounded-xl border border-moto-border animate-pulse flex items-center justify-center text-gray-500 font-mono">
-            Loading stories from Supabase...
+            Loading stories...
           </div>
         ) : posts.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -101,7 +101,7 @@ export default function HomePage() {
             <FileText size={48} className="mx-auto text-gray-600" />
             <h2 className="font-heading text-2xl text-white">No Published Stories in Database</h2>
             <p className="text-xs text-gray-400 max-w-md mx-auto">
-              Your Supabase `posts` table is currently empty. Use the Admin CMS to write and publish your first article!
+              No articles published yet. Use the Admin CMS to write and publish your first article!
             </p>
             <Link to="/admin/posts/new" className="inline-block bg-moto-orange text-white text-xs font-bold uppercase tracking-wider px-5 py-2.5 rounded shadow-glow-sm">
               Create First Article in Admin CMS

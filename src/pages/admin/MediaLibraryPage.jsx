@@ -364,7 +364,7 @@ export default function MediaLibraryPage() {
       {/* Media Grid or List View */}
       {loading ? (
         <div className="py-20 text-center text-gray-400 font-mono text-sm animate-pulse">
-          Loading media library from Supabase...
+          Loading media library...
         </div>
       ) : paginatedMedia.length > 0 ? (
         viewMode === 'grid' ? (

@@ -86,6 +86,30 @@ export async function signUpUser({ email, password, name, username }) {
   }
 }
 
+export async function resetPassword({ email }) {
+  try {
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    console.error('Error sending password reset email:', err);
+    throw err;
+  }
+}
+
+export async function updatePassword({ password }) {
+  try {
+    const { data, error } = await supabase.auth.updateUser({ password });
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    console.error('Error updating password:', err);
+    throw err;
+  }
+}
+
 // ==================== PUBLIC PORTAL SERVICES ====================
 
 export async function getCategories() {
@@ -97,7 +121,7 @@ export async function getCategories() {
       .order('sort_order', { ascending: true });
 
     if (error) {
-      console.error('Error fetching categories from Supabase:', error);
+      console.error('Error fetching categories:', error);
       return [];
     }
     return data || [];
@@ -129,7 +153,7 @@ export async function getPosts({ categorySlug, featuredOnly, search, limit = 20 
     const { data, error } = await query;
 
     if (error) {
-      console.error('Error fetching posts from Supabase:', error);
+      console.error('Error fetching posts:', error);
       return [];
     }
 
@@ -317,7 +341,7 @@ export async function createOrUpdatePost(postData) {
       return data[0];
     }
   } catch (err) {
-    console.error('Error saving post to Supabase:', err);
+    console.error('Error saving post:', err);
     throw err;
   }
 }
