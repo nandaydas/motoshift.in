@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getCategories, createCategory } from '../lib/supabase';
+import { getCategories, createCategory, logActivity, signOutUser } from '../lib/supabase';
 
 const AppContext = createContext();
 
@@ -75,12 +75,20 @@ export function AppProvider({ children }) {
   const loginAsAdmin = () => {
     const adminUser = {
       id: 'admin-1',
-      name: 'Admin User',
+      name: 'Nanday Das',
       email: 'admin@motoshift.in',
       role: 'admin',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'
     };
     setUser(adminUser);
+    logActivity({
+      action: 'USER_SIGNED_IN',
+      entity_type: 'user',
+      entity_id: adminUser.id,
+      description: `User "${adminUser.name}" (${adminUser.email}) signed in as Admin`,
+      actor_name: adminUser.name,
+      actor_email: adminUser.email
+    });
     showToast('Signed in as Admin', 'success');
   };
 
@@ -93,10 +101,29 @@ export function AppProvider({ children }) {
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80'
     };
     setUser(readerUser);
+    logActivity({
+      action: 'USER_SIGNED_IN',
+      entity_type: 'user',
+      entity_id: readerUser.id,
+      description: `User "${readerUser.name}" (${readerUser.email}) signed in`,
+      actor_name: readerUser.name,
+      actor_email: readerUser.email
+    });
     showToast('Signed in as Community Member', 'success');
   };
 
   const logout = () => {
+    if (user) {
+      logActivity({
+        action: 'USER_SIGNED_OUT',
+        entity_type: 'user',
+        entity_id: user.id,
+        description: `User "${user.name || user.email || 'User'}" signed out of MotoShift`,
+        actor_name: user.name || 'User',
+        actor_email: user.email
+      });
+      signOutUser(user);
+    }
     setUser(null);
     showToast('Logged out successfully', 'info');
   };
