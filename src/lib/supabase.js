@@ -74,6 +74,7 @@ export async function signOutUser(user) {
 export async function updateUserProfile(userId, data) {
   try {
     const payload = {
+      id: userId,
       name: data.name,
       username: data.username,
       avatar: data.avatar,
@@ -83,12 +84,11 @@ export async function updateUserProfile(userId, data) {
 
     const { data: updated, error } = await supabase
       .from('profiles')
-      .update(payload)
-      .eq('id', userId)
+      .upsert(payload, { onConflict: 'id' })
       .select('*');
 
     if (error) {
-      console.error('Error updating profile in Supabase:', error);
+      console.warn('Supabase profiles upsert note:', error.message);
     }
     return (updated && updated[0]) ? updated[0] : data;
   } catch (err) {

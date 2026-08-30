@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { updateUserProfile } from '../../lib/supabase';
 import MediaSelectModal from '../../components/common/MediaSelectModal';
@@ -19,6 +19,20 @@ export default function ProfileSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
 
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        name: user.name || prev.name,
+        username: user.username || prev.username,
+        email: user.email || prev.email,
+        avatar: user.avatar || prev.avatar,
+        bio: user.bio || prev.bio,
+        role: user.role || prev.role
+      }));
+    }
+  }, [user]);
+
   const handleSave = async (e) => {
     e.preventDefault();
     if (!formData.name.trim()) {
@@ -28,17 +42,20 @@ export default function ProfileSettingsPage() {
 
     setSaving(true);
     try {
-      const updated = await updateUserProfile(user?.id || 'u-1', formData);
+      const activeUserId = user?.id || 'admin-1';
+      const updated = await updateUserProfile(activeUserId, formData);
       const newUserData = {
-        ...user,
-        name: updated.name || formData.name,
-        username: updated.username || formData.username,
-        email: updated.email || formData.email,
-        avatar: updated.avatar || formData.avatar,
-        bio: updated.bio || formData.bio,
-        role: updated.role || formData.role
+        ...(user || {}),
+        id: activeUserId,
+        name: updated?.name || formData.name,
+        username: updated?.username || formData.username,
+        email: updated?.email || formData.email,
+        avatar: updated?.avatar || formData.avatar,
+        bio: updated?.bio || formData.bio,
+        role: updated?.role || formData.role
       };
       setUser(newUserData);
+      localStorage.setItem('motoshift_user', JSON.stringify(newUserData));
       showToast('Profile updated successfully!', 'success');
     } catch (err) {
       showToast('Failed to update profile', 'error');
