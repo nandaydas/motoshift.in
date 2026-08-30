@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getCategories, createCategory, logActivity, signOutUser } from '../lib/supabase';
+import { supabase, getCategories, createCategory, logActivity, signOutUser } from '../lib/supabase';
 
 const AppContext = createContext();
 
@@ -34,6 +34,28 @@ export function AppProvider({ children }) {
       setCategories(cats);
     }
     loadCategories();
+
+    // Listen for Supabase auth state changes (token refresh, login, logout)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user && !user) {
+        // Sync user state from active Supabase session
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+
+        setUser({
+          id: session.user.id,
+          email: session.user.email,
+          name: profile?.name || session.user.email.split('@')[0],
+          role: profile?.role || 'author',
+          avatar: profile?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'
+        });
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const addCategory = async (catData) => {

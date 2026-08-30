@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from '../../lib/supabase';
+import { supabase, supabaseAnonKey } from '../../lib/supabase';
 import { useApp } from '../../context/AppContext';
 import { 
   TrendingUp, RefreshCw, Download, Monitor, Smartphone, Globe, 
@@ -22,13 +22,13 @@ export default function AnalyticsPage() {
     setApiError(null);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token || 'sb_publishable_v3fezo9RVI75FyozbavCbQ_z6zCEHR-';
+      const token = session?.access_token || supabaseAnonKey;
 
       const res = await fetch('https://qugkwcwhnvzwmdknljky.supabase.co/functions/v1/fetch-google-analytics', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'apikey': 'sb_publishable_v3fezo9RVI75FyozbavCbQ_z6zCEHR-',
+          'apikey': supabaseAnonKey,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ name: 'Functions' })

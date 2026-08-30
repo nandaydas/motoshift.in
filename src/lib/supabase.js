@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://qugkwcwhnvzwmdknljky.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1Z2t3Y3dobnZ6d21ka25samt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3NzM0NDksImV4cCI6MjEwMzM0OTQ0OX0.oJp0MPu1pjPtU9IyhXuYYjl0jmNzhnGkmqBw_Tnjh0Q';
+export const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1Z2t3Y3dobnZ6d21ka25samt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3NzM0NDksImV4cCI6MjEwMzM0OTQ0OX0.oJp0MPu1pjPtU9IyhXuYYjl0jmNzhnGkmqBw_Tnjh0Q';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -166,13 +166,13 @@ export async function updatePassword({ password }) {
 export async function getEdgeAnalyticsData() {
   try {
     const { data: { session } } = await supabase.auth.getSession();
-    const token = session?.access_token || 'sb_publishable_v3fezo9RVI75FyozbavCbQ_z6zCEHR-';
+    const token = session?.access_token || supabaseAnonKey;
 
     const res = await fetch('https://qugkwcwhnvzwmdknljky.supabase.co/functions/v1/fetch-google-analytics', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
-        'apikey': 'sb_publishable_v3fezo9RVI75FyozbavCbQ_z6zCEHR-',
+        'apikey': supabaseAnonKey,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ name: 'Functions' })
