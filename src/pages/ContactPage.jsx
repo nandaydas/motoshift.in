@@ -61,8 +61,8 @@ export default function ContactPage() {
           <div className="p-5 bg-moto-card border border-moto-border rounded-xl space-y-3 text-xs">
             <h4 className="font-heading text-base text-white font-bold">Official Handles</h4>
             <div className="space-y-2">
-              <a href="https://instagram.com/mr_nanday" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-gray-300 hover:text-moto-orange">
-                <Instagram size={16} /> @mr_nanday
+              <a href="https://www.instagram.com/motoshift.in_official" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-gray-300 hover:text-moto-orange">
+                <Instagram size={16} /> @motoshift.in_official
               </a>
               <a href="https://youtube.com/@nandayvlogs8655" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-gray-300 hover:text-moto-orange">
                 <Youtube size={16} /> @nandayvlogs8655

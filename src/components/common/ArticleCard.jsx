@@ -5,9 +5,14 @@ import { Bookmark, Clock, Eye, User } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 export default function ArticleCard({ post, variant = 'grid', index }) {
-  const { isBookmarked, toggleBookmark } = useApp();
+  const { isBookmarked, toggleBookmark, user } = useApp();
 
   if (!post) return null;
+
+  const defaultFemaleAvatar = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80';
+  const authorAvatar = (post.author?.avatar && post.author.avatar !== defaultFemaleAvatar)
+    ? post.author.avatar
+    : (user?.avatar || post.author?.avatar || '/logo.png');
 
   const bookmarked = isBookmarked(post.id);
   const formattedDate = post.published_at 
@@ -44,7 +49,7 @@ export default function ArticleCard({ post, variant = 'grid', index }) {
             </span>
           </div>
 
-          <Link to={`/article/${post.slug}`} className="block group-hover:text-moto-orange transition-colors">
+          <Link to={`/article/${post.slug}`} state={{ post }} className="block group-hover:text-moto-orange transition-colors">
             <h2 className="text-2xl md:text-4xl font-extrabold text-white leading-tight font-heading">
               {post.title}
             </h2>
@@ -57,7 +62,7 @@ export default function ArticleCard({ post, variant = 'grid', index }) {
           <div className="flex items-center justify-between pt-2 border-t border-white/10 text-xs text-gray-400">
             <div className="flex items-center gap-2">
               <img
-                src={post.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'}
+                src={authorAvatar}
                 alt={post.author?.name || 'Author'}
                 className="w-6 h-6 rounded-full object-cover border border-moto-orange"
               />
@@ -88,7 +93,7 @@ export default function ArticleCard({ post, variant = 'grid', index }) {
   if (variant === 'split') {
     return (
       <div className="group flex flex-col sm:flex-row gap-4 p-3 rounded-lg border border-moto-border/60 bg-moto-card hover:border-moto-orange/50 transition-all">
-        <Link to={`/article/${post.slug}`} className="sm:w-2/5 shrink-0 h-44 sm:h-auto rounded overflow-hidden relative">
+        <Link to={`/article/${post.slug}`} state={{ post }} className="sm:w-2/5 shrink-0 h-44 sm:h-auto rounded overflow-hidden relative">
           <img
             src={post.cover_image}
             alt={post.title}
@@ -110,7 +115,7 @@ export default function ArticleCard({ post, variant = 'grid', index }) {
               <span className="flex items-center gap-1"><Clock size={11} /> {post.reading_time || 4} min</span>
             </div>
 
-            <Link to={`/article/${post.slug}`} className="block group-hover:text-moto-orange transition-colors">
+            <Link to={`/article/${post.slug}`} state={{ post }} className="block group-hover:text-moto-orange transition-colors">
               <h3 className="font-heading font-bold text-lg text-white leading-snug">
                 {post.title}
               </h3>
@@ -150,7 +155,7 @@ export default function ArticleCard({ post, variant = 'grid', index }) {
             <span>•</span>
             <span>{formattedDate}</span>
           </div>
-          <Link to={`/article/${post.slug}`} className="block font-heading text-sm text-gray-100 group-hover:text-moto-orange transition-colors leading-snug">
+          <Link to={`/article/${post.slug}`} state={{ post }} className="block font-heading text-sm text-gray-100 group-hover:text-moto-orange transition-colors leading-snug">
             {post.title}
           </Link>
         </div>
@@ -161,7 +166,7 @@ export default function ArticleCard({ post, variant = 'grid', index }) {
   // Grid Standard Variant
   return (
     <div className="group flex flex-col rounded-xl overflow-hidden border border-moto-border/60 bg-moto-card hover:border-moto-orange/50 transition-all duration-300 shadow-lg">
-      <Link to={`/article/${post.slug}`} className="relative h-48 overflow-hidden block">
+      <Link to={`/article/${post.slug}`} state={{ post }} className="relative h-48 overflow-hidden block">
         <img
           src={post.cover_image}
           alt={post.title}
@@ -197,7 +202,7 @@ export default function ArticleCard({ post, variant = 'grid', index }) {
             )}
           </div>
 
-          <Link to={`/article/${post.slug}`} className="block group-hover:text-moto-orange transition-colors">
+          <Link to={`/article/${post.slug}`} state={{ post }} className="block group-hover:text-moto-orange transition-colors">
             <h3 className="font-heading font-bold text-base text-white leading-snug line-clamp-2">
               {post.title}
             </h3>

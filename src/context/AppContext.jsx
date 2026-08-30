@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getCategories } from '../lib/supabase';
+import { getCategories, createCategory } from '../lib/supabase';
 
 const AppContext = createContext();
 
@@ -26,6 +26,7 @@ export function AppProvider({ children }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [toast, setToast] = useState(null);
+  const [adminHeader, setAdminHeader] = useState(null);
 
   useEffect(() => {
     async function loadCategories() {
@@ -34,6 +35,16 @@ export function AppProvider({ children }) {
     }
     loadCategories();
   }, []);
+
+  const addCategory = async (catData) => {
+    const created = await createCategory(catData);
+    setCategories(prev => {
+      const exists = prev.some(c => c.id === created.id || c.slug === created.slug);
+      if (exists) return prev;
+      return [...prev, created];
+    });
+    return created;
+  };
 
   useEffect(() => {
     localStorage.setItem('motoshift_bookmarks', JSON.stringify(bookmarks));
@@ -93,6 +104,7 @@ export function AppProvider({ children }) {
   return (
     <AppContext.Provider value={{
       categories,
+      addCategory,
       bookmarks,
       toggleBookmark,
       isBookmarked: (id) => bookmarks.includes(id),
@@ -105,7 +117,9 @@ export function AppProvider({ children }) {
       setIsSearchOpen,
       isAuthModalOpen,
       setIsAuthModalOpen,
-      showToast
+      showToast,
+      adminHeader,
+      setAdminHeader
     }}>
       {children}
       {toast && (

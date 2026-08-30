@@ -81,7 +81,7 @@ export default function AboutPage() {
               Motorcycle enthusiast, adventure touring rider, and content creator behind MotoShift.in. Dedicated to delivering raw two-wheeled stories for Indian riding communities.
             </p>
             <div className="flex items-center justify-center sm:justify-start gap-4 pt-2">
-              <a href="https://instagram.com/mr_nanday" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-moto-orange">
+              <a href="https://www.instagram.com/motoshift.in_official" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-moto-orange">
                 <Instagram size={18} />
               </a>
               <a href="https://youtube.com/@nandayvlogs8655" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-moto-orange">

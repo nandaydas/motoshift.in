@@ -4,7 +4,7 @@ import { useApp } from '../../context/AppContext';
 import { Plus } from 'lucide-react';
 
 export default function CategoriesPage() {
-  const { showToast } = useApp();
+  const { showToast, addCategory } = useApp();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -31,20 +31,13 @@ export default function CategoriesPage() {
     e.preventDefault();
     if (!formData.name) return;
     
-    const slugified = formData.slug || formData.name.toLowerCase().replace(/\s+/g, '-');
-    const newCat = {
-      ...formData,
-      slug: slugified,
-      id: `cat-${Date.now()}`
-    };
-
-    try {
-      await supabase.from('categories').insert([newCat]);
-    } catch (e) {}
-
-    setCategories([...categories, newCat]);
+    const created = await addCategory(formData);
+    setCategories(prev => {
+      const exists = prev.some(c => c.id === created.id);
+      return exists ? prev : [...prev, created];
+    });
     setIsModalOpen(false);
-    showToast('Category created successfully!', 'success');
+    showToast(`Category "${created.name}" created successfully!`, 'success');
     setFormData({ name: '', slug: '', description: '', color: '#ff5500', is_active: true });
   };
 

@@ -454,7 +454,7 @@ export default function MediaLibraryPage() {
             
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-moto-border bg-[#0b0b0b] flex items-center justify-between">
-              <h3 className="font-heading text-lg text-white font-extrabold tracking-wide uppercase">Attachment details</h3>
+              <h3 className="font-heading text-lg text-white font-extrabold tracking-wide">Attachment Details</h3>
               
               <div className="flex items-center gap-3">
                 {/* Previous & Next Item Navigation */}

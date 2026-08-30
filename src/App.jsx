@@ -6,6 +6,7 @@ import Footer from './components/layout/Footer';
 import SearchModal from './components/common/SearchModal';
 import AuthModal from './components/common/AuthModal';
 import GoogleAnalytics from './components/common/GoogleAnalytics';
+import ScrollToTop from './components/common/ScrollToTop';
 
 // Public Pages
 import HomePage from './pages/HomePage';
@@ -19,6 +20,8 @@ import TermsPage from './pages/TermsPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import NotFoundPage from './pages/NotFoundPage';
 
+import ProtectedRoute from './components/common/ProtectedRoute';
+
 // Admin CMS Pages
 import AdminLayout from './pages/admin/AdminLayout';
 import DashboardPage from './pages/admin/DashboardPage';
@@ -29,10 +32,12 @@ import CategoriesPage from './pages/admin/CategoriesPage';
 import MediaLibraryPage from './pages/admin/MediaLibraryPage';
 import CommentsModerationPage from './pages/admin/CommentsModerationPage';
 import ContactSubmissionsPage from './pages/admin/ContactSubmissionsPage';
+import ProfileSettingsPage from './pages/admin/ProfileSettingsPage';
 
 export default function App() {
   return (
     <Router>
+      <ScrollToTop />
       <AppProvider>
         <GoogleAnalytics />
         <div className="min-h-screen flex flex-col bg-moto-dark text-gray-100 font-sans">
@@ -53,17 +58,20 @@ export default function App() {
               <Route path="/terms" element={<TermsPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-              {/* Admin CMS Portal Routes */}
-              <Route path="/admin" element={<AdminLayout />}>
-                <Route index element={<DashboardPage />} />
-                <Route path="analytics" element={<AnalyticsPage />} />
-                <Route path="posts" element={<PostsListPage />} />
-                <Route path="posts/new" element={<PostEditorPage />} />
-                <Route path="posts/edit/:id" element={<PostEditorPage />} />
-                <Route path="categories" element={<CategoriesPage />} />
-                <Route path="media" element={<MediaLibraryPage />} />
-                <Route path="comments" element={<CommentsModerationPage />} />
-                <Route path="contact" element={<ContactSubmissionsPage />} />
+              {/* Protected Admin CMS Portal Routes */}
+              <Route element={<ProtectedRoute />}>
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<DashboardPage />} />
+                  <Route path="analytics" element={<AnalyticsPage />} />
+                  <Route path="posts" element={<PostsListPage />} />
+                  <Route path="posts/new" element={<PostEditorPage />} />
+                  <Route path="posts/edit/:id" element={<PostEditorPage />} />
+                  <Route path="categories" element={<CategoriesPage />} />
+                  <Route path="media" element={<MediaLibraryPage />} />
+                  <Route path="comments" element={<CommentsModerationPage />} />
+                  <Route path="contact" element={<ContactSubmissionsPage />} />
+                  <Route path="profile" element={<ProfileSettingsPage />} />
+                </Route>
               </Route>
 
               {/* Catch-all 404 Route */}

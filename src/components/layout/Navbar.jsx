@@ -56,7 +56,7 @@ export default function Navbar() {
 
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3 text-gray-400">
-              <a href="https://instagram.com/mr_nanday" target="_blank" rel="noreferrer" className="hover:text-moto-orange transition-colors">
+              <a href="https://www.instagram.com/motoshift.in_official" target="_blank" rel="noreferrer" className="hover:text-moto-orange transition-colors">
                 <Instagram size={14} />
               </a>
               <a href="https://youtube.com/@nandayvlogs8655" target="_blank" rel="noreferrer" className="hover:text-moto-orange transition-colors">
@@ -66,16 +66,6 @@ export default function Navbar() {
                 <Facebook size={14} />
               </a>
             </div>
-
-            <div className="h-3 w-px bg-moto-border" />
-
-            <Link 
-              to="/admin" 
-              className="flex items-center gap-1 text-moto-orange font-semibold hover:text-white transition-colors"
-            >
-              <ShieldCheck size={14} />
-              <span>ADMIN CMS</span>
-            </Link>
           </div>
         </div>
       </div>
@@ -85,10 +75,12 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-9 h-9 bg-moto-orange rounded flex items-center justify-center font-display font-extrabold text-xl text-black shadow-glow-sm group-hover:scale-105 transition-transform">
-              M
-            </div>
+          <Link to="/" className="flex items-center gap-2.5 group">
+            <img 
+              src="/logo.png" 
+              alt="MotoShift Logo" 
+              className="w-10 h-10 object-contain drop-shadow-md group-hover:scale-105 transition-transform" 
+            />
             <div className="flex flex-col">
               <span className="font-display text-2xl font-black tracking-tight text-white leading-none">
                 MOTO<span className="text-moto-orange">SHIFT</span><span className="text-xs font-sans text-gray-400 font-normal">.IN</span>
@@ -191,15 +183,7 @@ export default function Navbar() {
                   </div>
                 )}
               </div>
-            ) : (
-              <button
-                onClick={() => setIsAuthModalOpen(true)}
-                className="flex items-center gap-1.5 bg-moto-orange hover:bg-moto-orange-hover text-white text-xs font-bold uppercase tracking-wider px-3.5 py-2 rounded shadow-glow-sm transition-all"
-              >
-                <User size={14} />
-                <span>Sign In</span>
-              </button>
-            )}
+            ) : null}
 
             {/* Mobile Menu Hamburger */}
             <button

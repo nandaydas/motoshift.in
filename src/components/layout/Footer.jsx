@@ -29,10 +29,8 @@ export default function Footer() {
           
           {/* Brand Col */}
           <div className="lg:col-span-2 space-y-4">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="w-9 h-9 bg-moto-orange rounded flex items-center justify-center font-display font-extrabold text-xl text-black shadow-glow-sm">
-                M
-              </div>
+            <Link to="/" className="flex items-center gap-2.5">
+              <img src="/logo.png" alt="MotoShift Logo" className="w-9 h-9 object-contain drop-shadow-md" />
               <span className="font-display text-2xl font-black tracking-tight text-white">
                 MOTO<span className="text-moto-orange">SHIFT</span><span className="text-xs font-sans text-gray-400 font-normal">.IN</span>
               </span>
@@ -41,7 +39,7 @@ export default function Footer() {
               Your home for raw motorcycle reviews, epic route guides, track days, and unfiltered two-wheeled Indian moto culture. Built for riders, by riders.
             </p>
             <div className="flex items-center gap-3 pt-2">
-              <a href="https://instagram.com/mr_nanday" target="_blank" rel="noreferrer" className="w-9 h-9 rounded-full bg-moto-panel border border-moto-border flex items-center justify-center text-gray-300 hover:text-moto-orange hover:border-moto-orange transition-colors">
+              <a href="https://www.instagram.com/motoshift.in_official" target="_blank" rel="noreferrer" className="w-9 h-9 rounded-full bg-moto-panel border border-moto-border flex items-center justify-center text-gray-300 hover:text-moto-orange hover:border-moto-orange transition-colors">
                 <Instagram size={17} />
               </a>
               <a href="https://youtube.com/@nandayvlogs8655" target="_blank" rel="noreferrer" className="w-9 h-9 rounded-full bg-moto-panel border border-moto-border flex items-center justify-center text-gray-300 hover:text-moto-orange hover:border-moto-orange transition-colors">
@@ -79,7 +77,6 @@ export default function Footer() {
               <li><Link to="/contact" className="hover:text-moto-orange transition-colors">Contact Editorial</Link></li>
               <li><Link to="/privacy" className="hover:text-moto-orange transition-colors">Privacy Policy</Link></li>
               <li><Link to="/terms" className="hover:text-moto-orange transition-colors">Terms of Service</Link></li>
-              <li><Link to="/admin" className="text-moto-orange font-semibold hover:underline">Admin CMS</Link></li>
             </ul>
           </div>
 

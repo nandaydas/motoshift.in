@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { getPostBySlug, getPosts, getCommentsForPost, submitComment, incrementPostViews } from '../lib/supabase';
 import { useApp } from '../context/AppContext';
 import ArticleCard from '../components/common/ArticleCard';
@@ -7,13 +7,23 @@ import { Clock, Eye, Bookmark, Share2, MessageSquare, Send, CheckCircle2, Chevro
 import { formatDistanceToNow } from 'date-fns';
 import { marked } from 'marked';
 
+function renderArticleContent(content) {
+  if (!content) return '';
+  // Ensure double newlines before markdown headings so marked.parse parses them cleanly
+  const formatted = content.replace(/([^\n])\n*(#{1,6}\s+)/g, '$1\n\n$2');
+  return marked.parse(formatted);
+}
+
 export default function ArticleDetailPage() {
   const { slug } = useParams();
-  const { isBookmarked, toggleBookmark, showToast } = useApp();
-  const [post, setPost] = useState(null);
+  const location = useLocation();
+  const { isBookmarked, toggleBookmark, showToast, user } = useApp();
+
+  const initialPost = location.state?.post || null;
+  const [post, setPost] = useState(initialPost);
   const [relatedPosts, setRelatedPosts] = useState([]);
   const [comments, setComments] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialPost?.content);
 
   // Comment Form State
   const [commentName, setCommentName] = useState('');
@@ -24,11 +34,11 @@ export default function ArticleDetailPage() {
 
   useEffect(() => {
     async function loadPost() {
-      setLoading(true);
+      if (!post?.content) setLoading(true);
       const article = await getPostBySlug(slug);
-      setPost(article);
-
-      if (article?.id) {
+      
+      if (article) {
+        setPost(article);
         incrementPostViews(article.id);
         const comms = await getCommentsForPost(article.id);
         setComments(comms);
@@ -43,16 +53,35 @@ export default function ArticleDetailPage() {
     window.scrollTo(0, 0);
   }, [slug]);
 
-  if (loading) {
+  // Full-page Skeleton Loading when no initial post data exists
+  if (!post && loading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-20 text-center space-y-4">
-        <div className="w-12 h-12 border-4 border-moto-orange border-t-transparent rounded-full animate-spin mx-auto" />
-        <p className="text-gray-400 font-mono text-sm">Loading article story...</p>
+      <div className="max-w-4xl mx-auto px-4 py-8 space-y-8 animate-pulse">
+        {/* Header Skeleton */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="h-6 w-24 bg-moto-panel rounded border border-moto-border" />
+            <div className="h-4 w-28 bg-moto-panel rounded" />
+          </div>
+          <div className="h-10 bg-moto-panel rounded-lg w-3/4" />
+          <div className="h-4 bg-moto-panel rounded w-1/2" />
+        </div>
+        {/* Cover Skeleton */}
+        <div className="h-[400px] w-full bg-moto-panel rounded-xl border border-moto-border" />
+        {/* Body Skeleton */}
+        <div className="space-y-4 pt-4">
+          <div className="h-4 bg-moto-panel rounded w-full" />
+          <div className="h-4 bg-moto-panel rounded w-11/12" />
+          <div className="h-4 bg-moto-panel rounded w-4/5" />
+          <div className="h-40 bg-moto-panel/60 rounded-xl my-6 w-full" />
+          <div className="h-4 bg-moto-panel rounded w-full" />
+          <div className="h-4 bg-moto-panel rounded w-3/4" />
+        </div>
       </div>
     );
   }
 
-  if (!post) {
+  if (!post && !loading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-20 text-center space-y-4">
         <h2 className="font-heading text-3xl text-white">Article Not Found</h2>
@@ -63,6 +92,14 @@ export default function ArticleDetailPage() {
       </div>
     );
   }
+
+  const defaultFemaleAvatar = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80';
+  const authorAvatar = (post.author?.avatar && post.author.avatar !== defaultFemaleAvatar)
+    ? post.author.avatar
+    : (user?.avatar || post.author?.avatar || '/logo.png');
+
+  const authorName = post.author?.name || user?.name || 'Nanday Das';
+  const authorBio = post.author?.bio || user?.bio || 'Senior motorcycle journalist, track rider, and founder of MotoShift.in. Obsessed with high-rpm inline triples and long-distance mountain expeditions.';
 
   const bookmarked = isBookmarked(post.id);
   const categoryName = post.category?.name || 'General';
@@ -143,12 +180,12 @@ export default function ArticleDetailPage() {
           <div className="flex flex-wrap items-center justify-between gap-4 py-4 border-y border-moto-border text-xs">
             <div className="flex items-center gap-3">
               <img
-                src={post.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'}
-                alt={post.author?.name || 'Author'}
+                src={authorAvatar}
+                alt={authorName}
                 className="w-10 h-10 rounded-full object-cover border-2 border-moto-orange"
               />
               <div>
-                <p className="font-bold text-white text-sm">{post.author?.name || 'MotoShift Staff'}</p>
+                <p className="font-bold text-white text-sm">{authorName}</p>
                 <p className="text-gray-400">Published {formattedDate}</p>
               </div>
             </div>
@@ -188,23 +225,34 @@ export default function ArticleDetailPage() {
           </div>
         )}
 
-        {/* Rendered Article Content (Markdown / HTML) */}
-        <div 
-          className="prose prose-invert max-w-none prose-headings:font-heading prose-headings:text-white prose-p:text-gray-300 prose-p:leading-relaxed prose-a:text-moto-orange prose-blockquote:border-l-4 prose-blockquote:border-moto-orange prose-blockquote:bg-moto-card prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded-r font-sans text-base space-y-6"
-          dangerouslySetInnerHTML={{ __html: post.content ? (post.content.trim().startsWith('<') ? post.content : marked.parse(post.content)) : '' }}
-        />
+        {/* Rendered Article Content (Markdown / HTML) or Skeleton */}
+        {post.content ? (
+          <div 
+            className="prose prose-invert max-w-none prose-headings:font-heading prose-headings:text-white prose-p:text-gray-300 prose-p:leading-relaxed prose-a:text-moto-orange prose-blockquote:border-l-4 prose-blockquote:border-moto-orange prose-blockquote:bg-moto-card prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded-r font-sans text-base space-y-6"
+            dangerouslySetInnerHTML={{ __html: renderArticleContent(post.content) }}
+          />
+        ) : (
+          <div className="space-y-4 py-4 animate-pulse">
+            <div className="h-4 bg-moto-panel rounded-md w-full" />
+            <div className="h-4 bg-moto-panel rounded-md w-11/12" />
+            <div className="h-4 bg-moto-panel rounded-md w-4/5" />
+            <div className="h-44 bg-moto-panel/60 rounded-xl my-6 w-full" />
+            <div className="h-4 bg-moto-panel rounded-md w-full" />
+            <div className="h-4 bg-moto-panel rounded-md w-3/4" />
+          </div>
+        )}
 
         {/* Author Bio Box */}
         <div className="bg-moto-card border border-moto-border rounded-xl p-6 flex flex-col sm:flex-row gap-4 items-center sm:items-start">
           <img
-            src={post.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'}
-            alt={post.author?.name}
+            src={authorAvatar}
+            alt={authorName}
             className="w-16 h-16 rounded-full object-cover border-2 border-moto-orange shrink-0"
           />
           <div className="space-y-1 text-center sm:text-left">
-            <h4 className="font-heading font-bold text-white text-base">Written by {post.author?.name || 'Nanday Das'}</h4>
+            <h4 className="font-heading font-bold text-white text-base">Written by {authorName}</h4>
             <p className="text-xs text-gray-400 leading-relaxed">
-              {post.author?.bio || 'Senior motorcycle journalist, track rider, and founder of MotoShift.in. Obsessed with high-rpm inline triples and long-distance mountain expeditions.'}
+              {authorBio}
             </p>
           </div>
         </div>

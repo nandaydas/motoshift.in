@@ -45,7 +45,7 @@ export default function CategoryPage() {
           >
             Category Feed
           </span>
-          <h1 className="font-heading text-4xl md:text-5xl text-white font-extrabold tracking-wide uppercase">
+          <h1 className="font-heading text-4xl md:text-5xl text-white font-extrabold tracking-wide">
             {category?.name}
           </h1>
           <p className="text-sm text-gray-300 leading-relaxed">

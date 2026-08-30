@@ -46,7 +46,7 @@ export default function ResetPasswordPage() {
           <div className="w-12 h-12 bg-moto-orange/20 border border-moto-orange/40 text-moto-orange rounded-full flex items-center justify-center mx-auto mb-2">
             <KeyRound size={24} />
           </div>
-          <h1 className="font-heading text-2xl text-white font-bold uppercase tracking-wider">
+          <h1 className="font-heading text-2xl text-white font-bold tracking-wider">
             Set New Password
           </h1>
           <p className="text-xs text-gray-400">

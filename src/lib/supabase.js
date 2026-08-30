@@ -46,6 +46,32 @@ export async function signInUser({ email, password }) {
   }
 }
 
+export async function updateUserProfile(userId, data) {
+  try {
+    const payload = {
+      name: data.name,
+      username: data.username,
+      avatar: data.avatar,
+      bio: data.bio,
+      updated_at: new Date().toISOString()
+    };
+
+    const { data: updated, error } = await supabase
+      .from('profiles')
+      .update(payload)
+      .eq('id', userId)
+      .select('*');
+
+    if (error) {
+      console.error('Error updating profile in Supabase:', error);
+    }
+    return (updated && updated[0]) ? updated[0] : data;
+  } catch (err) {
+    console.error('Error in updateUserProfile:', err);
+    return data;
+  }
+}
+
 export async function signUpUser({ email, password, name, username }) {
   try {
     const { data, error } = await supabase.auth.signUp({
@@ -117,17 +143,62 @@ export async function getCategories() {
     const { data, error } = await supabase
       .from('categories')
       .select('*')
-      .eq('is_active', true)
-      .order('sort_order', { ascending: true });
+      .order('created_at', { ascending: true });
 
     if (error) {
-      console.error('Error fetching categories:', error);
+      console.error('Error fetching categories from database:', error);
       return [];
     }
     return data || [];
   } catch (err) {
     console.error('Error in getCategories:', err);
     return [];
+  }
+}
+
+export async function createCategory(catData) {
+  try {
+    const slugified = catData.slug || catData.name.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
+    const categoryId = (catData.id && catData.id.includes('-') && catData.id.length > 20)
+      ? catData.id 
+      : (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : undefined);
+
+    const payload = {
+      name: catData.name.trim(),
+      slug: slugified,
+      description: (catData.description || '').trim(),
+      color: catData.color || '#ff5500',
+      is_active: catData.is_active !== false,
+      sort_order: catData.sort_order || 99
+    };
+
+    if (categoryId) {
+      payload.id = categoryId;
+    }
+
+    const { data, error } = await supabase
+      .from('categories')
+      .insert([payload])
+      .select('*');
+
+    if (error) {
+      console.error('Error inserting category to Supabase:', error);
+      return {
+        id: categoryId || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `cat-${Date.now()}`),
+        ...payload
+      };
+    }
+    return (data && data[0]) ? data[0] : payload;
+  } catch (err) {
+    console.error('Error in createCategory:', err);
+    return {
+      id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `cat-${Date.now()}`,
+      name: catData.name,
+      slug: catData.slug || catData.name.toLowerCase().replace(/\s+/g, '-'),
+      description: catData.description || '',
+      color: catData.color || '#ff5500',
+      is_active: true
+    };
   }
 }
 
@@ -197,6 +268,16 @@ export async function getPostBySlug(slug) {
 
 export async function incrementPostViews(id) {
   try {
+    const sessionKey = `motoshift_viewed_${id}`;
+    try {
+      if (sessionStorage.getItem(sessionKey)) {
+        return; // Already incremented view for this article in current session
+      }
+      sessionStorage.setItem(sessionKey, 'true');
+    } catch (storageErr) {
+      // Storage unavailable fallback
+    }
+
     const { data } = await supabase.from('posts').select('views').eq('id', id).single();
     if (data) {
       await supabase.from('posts').update({ views: (data.views || 0) + 1 }).eq('id', id);
